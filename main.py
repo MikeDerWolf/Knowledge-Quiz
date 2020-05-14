@@ -153,7 +153,59 @@ class Settings(Frame):
             initialVolumeIndex -= 1
             pygame.mixer.music.set_volume(volumeLevels[initialVolumeIndex])
 
+class TopScore(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
 
+        self.backgroundImage = ImageTk.PhotoImage(Image.open("backgroundTopScore.jpg"))
+        self.backgroundLabel = Label(self, image=self.backgroundImage)
+        self.backgroundLabel.place(x=0, y=0, relwidth=1, relheight=1)
+
+        self.imgBtnBack = PhotoImage(file="btnBack.png")
+        self.imgBtnBackDark = PhotoImage(file="btnBackDark.png")
+
+        self.scoreFrame = LabelFrame(self, bg = "#cddbfe", relief = RAISED)
+        self.scoreFrame.grid(row = 0, column = 1, pady = (175,0))
+
+        self.scroll = Scrollbar(self.scoreFrame, bg = "#cddbfe")
+        self.scroll.pack(side = RIGHT, fill = Y)
+
+        self.scoreBox = Listbox(self.scoreFrame, width = 33, height = 11, font=("Rokkitt"), bg = "#cddbfe", fg = "#7d3b00",
+                                yscrollcommand = self.scroll.set, selectmode = SINGLE)
+        self.scoreBox.pack(side = LEFT)
+
+        self.scroll.configure(command = self.scoreBox.yview)
+
+        self.conn = sqlite3.connect('mdsproject.db')
+        self.c = self.conn.cursor()
+
+        self.c.execute("SELECT * FROM top_score ORDER BY score DESC")
+        self.records = self.c.fetchall()
+
+        self.conn.commit()
+        self.conn.close()
+
+        for i in range(len(self.records)):
+            self.scoreBox.insert(END, "  " + str(i+1) + ".     " + str(self.records[i][1]) + "          " + self.records[i][0])
+
+        self.btnBack = Button(self, compound=CENTER, text="Back", image=self.imgBtnBack, border=0,
+                              font=("Rokkitt", 18, "bold"),
+                              bg="#fee0c4", fg="black", activebackground="#fee0c4", activeforeground="black",
+                              command=lambda: [self.reinitialize(), controller.show_frame(MainMenu), self.destroy(),
+                                               self.kill()])
+        self.btnBack.bind("<Enter>", lambda event: self.btnBack.configure(image=self.imgBtnBackDark))
+        self.btnBack.bind("<Leave>", lambda event: self.btnBack.configure(image=self.imgBtnBack))
+        self.btnBack.grid(row=2, column=0, padx=(30, 75), pady=(58, 0))
+
+    def kill(self):
+        del self
+        gc.collect()
+
+    def reinitialize(self):
+        frame = TopScore(app.container, app)
+        del app.frames[TopScore]
+        app.frames[TopScore] = frame
+        frame.grid(row=0, column=0, sticky="nsew")
 
 app = Root()
 app.mainloop()
