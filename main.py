@@ -183,7 +183,7 @@ class TopScore(Frame):
 
         self.scroll.configure(command = self.scoreBox.yview)
 
-        self.conn = sqlite3.connect('mdsproject2.db')
+        self.conn = sqlite3.connect('mdsproject.db')
         self.c = self.conn.cursor()
 
         self.c.execute("SELECT * FROM top_score ORDER BY score DESC")
@@ -317,7 +317,7 @@ class Category(Frame):
         self.btnArte = Button(self, compound=CENTER, height=80, image=self.imgBtnArte, border=0,
                              activebackground="#fee6cd", activeforeground="#af4343", text="Arte",
                              font=("Rokkitt", 25, "bold"),
-                             bg="#fee6cd", fg="#af4343")
+                             bg="#fee6cd", fg="#af4343", command = lambda :self.startGame("arte_divertisment"))
         self.btnArte.bind("<Enter>", lambda event: self.btnArte.configure(image=self.imgBtnArteDark))
         self.btnArte.bind("<Leave>", lambda event: self.btnArte.configure(image=self.imgBtnArte))
         self.btnArte.grid(row=3, column=0, padx=(40, 86))
@@ -349,7 +349,7 @@ class Category(Frame):
         self.btnChimie = Button(self, compound=CENTER, height=80, image=self.imgBtnChimie, border=0,
                              activebackground="#fee6cd", activeforeground="#af4343", text="Chimie",
                              font=("Rokkitt", 25, "bold"),
-                             bg="#fee6cd", fg="#af4343")
+                             bg="#fee6cd", fg="#af4343", command = lambda :self.startGame("chimie"))
         self.btnChimie.bind("<Enter>", lambda event: self.btnChimie.configure(image=self.imgBtnChimieDark))
         self.btnChimie.bind("<Leave>", lambda event: self.btnChimie.configure(image=self.imgBtnChimie))
         self.btnChimie.grid(row = 1, column = 2, padx=(86, 0))
@@ -357,7 +357,7 @@ class Category(Frame):
         self.btnGeo = Button(self, compound=CENTER, height=80, image=self.imgBtnGeo, border=0,
                                activebackground="#fee6cd", activeforeground="#af4343", text="Geografie",
                                font=("Rokkitt", 25, "bold"),
-                               bg="#fee6cd", fg="#af4343")
+                               bg="#fee6cd", fg="#af4343", command = lambda :self.startGame("geografie"))
         self.btnGeo.bind("<Enter>", lambda event: self.btnGeo.configure(image=self.imgBtnGeoDark))
         self.btnGeo.bind("<Leave>", lambda event: self.btnGeo.configure(image=self.imgBtnGeo))
         self.btnGeo.grid(row=2, column=2, padx=(86, 0), pady=(25,25))
@@ -394,6 +394,8 @@ class Game(Frame):
         self.configure(bg = "#fee6cd")
 
         self.t = 15
+        self.oneOutCount = 3
+        self.twoOutCount = 2
         self.nr_frame = 0
         self.score = 0
 
@@ -403,8 +405,11 @@ class Game(Frame):
         self.imgBtnQstDark = PhotoImage(file="btnQstDark.png")
         self.imgBtnUtils = PhotoImage(file = "btnUtils.png")
         self.imgBtnUtilsDark = PhotoImage(file="btnUtilsDark.png")
+        self.imgBtnQstRight = PhotoImage(file = "btnQstRight.png")
+        self.imgBtnQstWrong = PhotoImage(file = "btnQstWrong.png")
 
-        self.conn = sqlite3.connect('mdsproject2.db')
+
+        self.conn = sqlite3.connect('mdsproject.db')
         self.c = self.conn.cursor()
 
         if category == "mixed":
@@ -453,7 +458,8 @@ class Game(Frame):
 
     def countdown(self):
         if self.t>0:
-            self.lbl.config(text = str(self.t))
+            if not self.btnPressed:
+                self.lbl.config(text = str(self.t))
             self.t -= 1
             self.lbl.after(1000, self.countdown)
         elif self.t == 0:
@@ -497,6 +503,7 @@ class Game(Frame):
                 self.btnQuit.pack(padx=(50, 0), pady=(120, 0), side=LEFT)
 
     def createNewFrame(self, number):
+        self.btnPressed = False
         self.container = LabelFrame(self, width=920, height=630, bg="#fee6cd", border=0, relief=SUNKEN)
         self.container.pack(pady=10)
 
@@ -510,7 +517,7 @@ class Game(Frame):
         self.btn1 = Button(self.container, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                                 activebackground="#fee6cd", activeforeground="#af4343",
                                 font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text = self.records[self.indexes[number]][1], command=self.btnClicked1)
+                           text = self.records[self.indexes[number]][1], command= lambda: self.btnClicked(self.btn1))
         self.btn1.bind("<Enter>", lambda event: self.btn1.configure(image=self.imgBtnQstDark))
         self.btn1.bind("<Leave>", lambda event: self.btn1.configure(image=self.imgBtnQst))
         self.btn1.pack(pady = (30,0))
@@ -518,7 +525,7 @@ class Game(Frame):
         self.btn2 = Button(self.container, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                            activebackground="#fee6cd", activeforeground="#af4343",
                            font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text=self.records[self.indexes[number]][2], command=self.btnClicked2)
+                           text=self.records[self.indexes[number]][2], command= lambda: self.btnClicked(self.btn2))
         self.btn2.bind("<Enter>", lambda event: self.btn2.configure(image=self.imgBtnQstDark))
         self.btn2.bind("<Leave>", lambda event: self.btn2.configure(image=self.imgBtnQst))
         self.btn2.pack(pady = (20,0))
@@ -526,7 +533,7 @@ class Game(Frame):
         self.btn3 = Button(self.container, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                            activebackground="#fee6cd", activeforeground="#af4343",
                            font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text=self.records[self.indexes[number]][3], command=self.btnClicked3)
+                           text=self.records[self.indexes[number]][3], command= lambda: self.btnClicked(self.btn3))
         self.btn3.bind("<Enter>", lambda event: self.btn3.configure(image=self.imgBtnQstDark))
         self.btn3.bind("<Leave>", lambda event: self.btn3.configure(image=self.imgBtnQst))
         self.btn3.pack(pady = (20,0))
@@ -534,7 +541,7 @@ class Game(Frame):
         self.btn4 = Button(self.container, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                            activebackground="#fee6cd", activeforeground="#af4343",
                            font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text=self.records[self.indexes[number]][4], command=self.btnClicked4)
+                           text=self.records[self.indexes[number]][4], command= lambda: self.btnClicked(self.btn4))
         self.btn4.bind("<Enter>", lambda event: self.btn4.configure(image=self.imgBtnQstDark))
         self.btn4.bind("<Leave>", lambda event: self.btn4.configure(image=self.imgBtnQst))
         self.btn4.pack(pady = (20,0))
@@ -552,49 +559,137 @@ class Game(Frame):
         self.btnOneOut = Button(self, compound=CENTER, height=55, image=self.imgBtnUtils, border=0,
                               activebackground="#fee6cd", activeforeground="#af4343",
                               font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                              text="Eliminate 1")
+                              text="Eliminate 1", command = self.eliminateOne)
         self.btnOneOut.bind("<Enter>", lambda event: self.btnOneOut.configure(image=self.imgBtnUtilsDark))
         self.btnOneOut.bind("<Leave>", lambda event: self.btnOneOut.configure(image=self.imgBtnUtils))
         self.btnOneOut.pack(padx=(30, 30), pady=(20, 0), side=LEFT)
 
+        if(self.oneOutCount == 0):
+            self.btnOneOut.configure(state = 'disabled')
+
         self.btnTwoOut = Button(self, compound=CENTER, height=55, image=self.imgBtnUtils, border=0,
                                 activebackground="#fee6cd", activeforeground="#af4343",
                                 font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                                text="Eliminate 2")
+                                text="Eliminate 2", command = self.eliminateTwo)
         self.btnTwoOut.bind("<Enter>", lambda event: self.btnTwoOut.configure(image=self.imgBtnUtilsDark))
         self.btnTwoOut.bind("<Leave>", lambda event: self.btnTwoOut.configure(image=self.imgBtnUtils))
         self.btnTwoOut.pack(padx=(30, 30), pady=(20, 0), side=LEFT)
 
+        if (self.twoOutCount == 0):
+            self.btnTwoOut.configure(state='disabled')
+
         self.nr_frame += 1
         self.countdown()
-
+    """
     def btnClicked1(self):
         text = self.records[self.indexes[self.nr_frame-1]][5]
         if text == self.btn1['text']:
             self.score += 100
             self.score += self.t * 10
-        self.t = 0
+        self.btn1['state'] = 'disabled'
+        self.btn2['state'] = 'disabled'
+        self.btn3['state'] = 'disabled'
+        self.btn4['state'] = 'disabled'
+        self.t = 2
 
     def btnClicked2(self):
         text = self.records[self.indexes[self.nr_frame-1]][5]
         if text == self.btn2['text']:
             self.score += 100
             self.score += self.t * 10
-        self.t = 0
+        self.btn1['state'] = 'disabled'
+        self.btn2['state'] = 'disabled'
+        self.btn3['state'] = 'disabled'
+        self.btn4['state'] = 'disabled'
+        self.t = 2
 
     def btnClicked3(self):
         text = self.records[self.indexes[self.nr_frame-1]][5]
         if text == self.btn3['text']:
             self.score += 100
             self.score += self.t * 10
-        self.t = 0
+        self.btn1['state'] = 'disabled'
+        self.btn2['state'] = 'disabled'
+        self.btn3['state'] = 'disabled'
+        self.btn4['state'] = 'disabled'
+        self.t = 2
 
     def btnClicked4(self):
         text = self.records[self.indexes[self.nr_frame-1]][5]
         if text == self.btn4['text']:
             self.score += 100
             self.score += self.t * 10
-        self.t = 0
+        self.btn1['state'] = 'disabled'
+        self.btn2['state'] = 'disabled'
+        self.btn3['state'] = 'disabled'
+        self.btn4['state'] = 'disabled'
+        self.t = 2
+    """
+
+
+    def btnClicked(self, btn):
+        self.btnPressed = True
+        text = self.records[self.indexes[self.nr_frame - 1]][5]
+        self.lbl.configure(text = "")
+        self.btn1['command'] = 0
+        self.btn2['command'] = 0
+        self.btn3['command'] = 0
+        self.btn4['command'] = 0
+
+        self.btn1.unbind("<Enter>")
+        self.btn2.unbind("<Enter>")
+        self.btn3.unbind("<Enter>")
+        self.btn4.unbind("<Enter>")
+        self.btn1.unbind("<Leave>")
+        self.btn2.unbind("<Leave>")
+        self.btn3.unbind("<Leave>")
+        self.btn4.unbind("<Leave>")
+
+        self.btnOneOut['state'] = 'disabled'
+        self.btnTwoOut['state'] = 'disabled'
+
+        self.btn1.configure(image=self.imgBtnQstWrong, fg = "black", activeforeground = "black", relief = SUNKEN)
+        self.btn2.configure(image=self.imgBtnQstWrong, fg = "black", activeforeground = "black", relief = SUNKEN)
+        self.btn3.configure(image=self.imgBtnQstWrong, fg = "black", activeforeground = "black", relief = SUNKEN)
+        self.btn4.configure(image=self.imgBtnQstWrong, fg = "black", activeforeground = "black", relief = SUNKEN)
+
+        if text == self.btn1['text']:
+            self.btn1.configure(image=self.imgBtnQstRight)
+        if text == self.btn2['text']:
+            self.btn2.configure(image=self.imgBtnQstRight)
+        if text == self.btn3['text']:
+            self.btn3.configure(image=self.imgBtnQstRight)
+        if text == self.btn4['text']:
+            self.btn4.configure(image=self.imgBtnQstRight)
+
+        if text == btn['text']:
+            self.score += 100
+            self.score += self.t * 10
+
+        self.t = 2
+
+    def eliminateOne(self):
+        text = self.records[self.indexes[self.nr_frame - 1]][5]
+        buttons = [button for button in [self.btn1, self.btn2, self.btn3, self.btn4] if button['text'] != text]
+        index = random.randint(0,2)
+        buttons[index]['state'] = 'disabled'
+        self.oneOutCount -= 1
+        self.score -= 25
+        self.btnOneOut['state'] = 'disabled'
+        self.btnTwoOut['state'] = 'disabled'
+
+    def eliminateTwo(self):
+        text = self.records[self.indexes[self.nr_frame - 1]][5]
+        buttons = [button for button in [self.btn1, self.btn2, self.btn3, self.btn4] if button['text'] != text]
+        indexes = random.sample(range(0, 3), 2)
+        buttons[indexes[0]]['state'] = 'disabled'
+        buttons[indexes[1]]['state'] = 'disabled'
+        self.twoOutCount -= 1
+        self.score -= 50
+        self.btnOneOut['state'] = 'disabled'
+        self.btnTwoOut['state'] = 'disabled'
+
+
 
     def kill(self):
         del self
@@ -604,12 +699,16 @@ class Game(Frame):
         del app.frames[Game]
 
     def saveScore(self):
-        self.conn = sqlite3.connect('mdsproject2.db')
+        self.conn = sqlite3.connect('mdsproject.db')
         self.c = self.conn.cursor()
+
+        text = self.entry.get()
+        if text == "":
+            text = "-"
 
         self.c.execute("INSERT INTO top_score VALUES (:user, :score)",
                        {
-                           'user' : self.entry.get(),
+                           'user' : text,
                            'score' : self.score
                        }
                        )
