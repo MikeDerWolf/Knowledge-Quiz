@@ -5,6 +5,7 @@ import pygame
 import sqlite3
 import gc
 import random
+import copy
 
 pygame.init()
 pygame.mixer.music.load("RUDE - Eternal Youth.mp3")
@@ -1116,7 +1117,7 @@ class GameMode(Frame):
         self.btnPvp = Button(self, compound=CENTER, height=190, image=self.imgBtnPvp, border=0,
                               activebackground="#fee6cd", activeforeground="#af4343", text="PvP",
                               font=("Rokkitt", 25, "bold"),
-                              bg="#fee6cd", fg="#af4343")
+                              bg="#fee6cd", fg="#af4343", command = self.startGamePvP)
         self.btnPvp.bind("<Enter>", lambda event: self.btnPvp.configure(image=self.imgBtnPvpDark))
         self.btnPvp.bind("<Leave>", lambda event: self.btnPvp.configure(image=self.imgBtnPvp))
         self.btnPvp.grid(row = 1, column = 1)
@@ -1124,7 +1125,7 @@ class GameMode(Frame):
         self.btnPvpSr = Button(self, compound=CENTER, height=190, image=self.imgBtnPvpSr, border=0,
                              activebackground="#fee6cd", activeforeground="#af4343", text="PvP\nSpeedrun",
                              font=("Rokkitt", 25, "bold"),
-                             bg="#fee6cd", fg="#af4343")
+                             bg="#fee6cd", fg="#af4343", command = self.startGamePvpSr)
         self.btnPvpSr.bind("<Enter>", lambda event: self.btnPvpSr.configure(image=self.imgBtnPvpSrDark))
         self.btnPvpSr.bind("<Leave>", lambda event: self.btnPvpSr.configure(image=self.imgBtnPvpSr))
         self.btnPvpSr.grid(row = 1, column = 2)
@@ -1136,6 +1137,19 @@ class GameMode(Frame):
         self.btnBack.bind("<Enter>", lambda event: self.btnBack.configure(image=self.imgBtnBackDark))
         self.btnBack.bind("<Leave>", lambda event: self.btnBack.configure(image=self.imgBtnBack))
         self.btnBack.grid(row=2, column=0, sticky = W, padx=(30, 0), pady=(142, 0))
+
+    def startGamePvP(self):
+        frame = GamePvP(app.container, app)
+        app.frames[GamePvP] = frame
+        frame.grid(row=0, column=0, sticky="nsew")
+        app.show_frame(GamePvP)
+
+    def startGamePvpSr(self):
+        frame = GamePvPSr(app.container, app)
+        app.frames[GamePvPSr] = frame
+        frame.grid(row=0, column=0, sticky="nsew")
+        app.show_frame(GamePvPSr)
+
 
 
 
@@ -1573,6 +1587,782 @@ class Game(Frame):
     def abort(self):
         del app.frames[Game]
 
+
+
+
+class GamePvP(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+
+        self.configure(bg = "#fee6cd")
+
+        self.scorPlayer1 = 0
+        self.scorPlayer2 = 0
+
+        self.numePlayer1 = ''
+        self.numePlayer2 = ''
+
+        self.rspCorect1 = 0
+        self.rspCorect2 = 0
+
+        self.isPlaying1 = False
+        self.isPlaying2 = False
+
+        self.t = 15
+        self.oneOutCount = 3
+        self.twoOutCount = 2
+        self.nr_frame = 0
+        self.score = 0
+        self.corecte = 0
+
+
+        self.imgBtnStart = PhotoImage(file="btnStart.png")
+        self.imgBtnStartDark = PhotoImage(file="btnStartDark.png")
+        self.imgBtnQst = PhotoImage(file="btnQst.png")
+        self.imgBtnQstDark = PhotoImage(file="btnQstDark.png")
+        self.imgBtnUtils = PhotoImage(file = "btnUtils.png")
+        self.imgBtnUtilsDark = PhotoImage(file="btnUtilsDark.png")
+        self.imgBtnQstRight = PhotoImage(file = "btnQstRight.png")
+        self.imgBtnQstWrong = PhotoImage(file = "btnQstWrong.png")
+
+
+        self.conn = sqlite3.connect('mdsproject.db')
+        self.c = self.conn.cursor()
+
+        self.c.execute("SELECT * FROM biologie UNION SELECT * FROM chimie UNION SELECT * FROM arte_divertisment UNION SELECT * FROM istorie UNION SELECT * FROM geografie UNION SELECT * FROM matematica UNION SELECT * FROM sport UNION SELECT * FROM diverse")
+
+
+        self.records = self.c.fetchall()
+
+        self.conn.commit()
+        self.conn.close()
+
+        self.indexes = random.sample(range(0, len(self.records)), 20)
+
+
+        self.container = LabelFrame(self,width = 920, height = 630, bg = "#fee6cd", border = 1, relief = SUNKEN)
+        self.container.pack(pady = 10)
+
+        self.lblPlayer1 = Label(self.container, text="Player 1", font=("Rokkitt", 20, "bold"), bg="#fee6cd", fg="#b05e11")
+        self.lblPlayer1.place(x=420, y=20)
+
+        self.entryPlayer1 = Entry(self.container, font=("Rokkitt", 20), fg="#b05e11")
+        self.entryPlayer1.place(x=325, y=80)
+
+        self.lblPlayer2 = Label(self.container, text="Player 2", font=("Rokkitt", 20, "bold"), bg="#fee6cd", fg="#b05e11")
+        self.lblPlayer2.place(x=420, y=140)
+
+        self.entryPlayer2 = Entry(self.container, font=("Rokkitt", 20), fg="#b05e11")
+        self.entryPlayer2.place(x=325, y=200)
+
+        self.lblWarning = Label(self, text="", font=("Rokkitt", 20, "bold"), bg="#fee6cd", fg="red")
+        self.lblWarning.place(x=340, y=320)
+
+
+        self.btnStart = Button(self.container, compound=CENTER, height=80, image=self.imgBtnStart, border=0,
+                             activebackground="#fee6cd", activeforeground="#af4343", text="START",
+                             font=("Rokkitt", 25, "bold"),
+                             bg="#fee6cd", fg="#af4343", command = self.pressStart)
+        self.btnStart.bind("<Enter>", lambda event: self.btnStart.configure(image=self.imgBtnStartDark))
+        self.btnStart.bind("<Leave>", lambda event: self.btnStart.configure(image=self.imgBtnStart))
+        self.btnStart.place(x=350, y=400)
+
+        self.lbl = Label()
+        self.qst = Message()
+        self.btn1 = Button()
+        self.btn2 = Button()
+        self.btn3 = Button()
+        self.btn4 = Button()
+
+        self.btnQuit = Button()
+        self.btnOneOut = Button()
+        self.btnTwoOut = Button()
+
+        self.lblScore = Label()
+
+    def pressStart(self):
+        numePlayer1 = self.entryPlayer1.get()
+        numePlayer2 = self.entryPlayer2.get()
+
+        if not numePlayer1 or not numePlayer2 or numePlayer1 == numePlayer2:
+            self.lblWarning.configure(text="Nume diferite obligatorii!", fg="red")
+            self.lblWarning.after(1500, lambda: self.lblWarning.configure(text=""))
+        else:
+            self.numePlayer1 = numePlayer1
+            self.numePlayer2 = numePlayer2
+            self.isPlaying1 = True
+            self.beginTest()
+
+    def beginTest(self):
+        self.container.destroy()
+        self.createNewFrame(self.nr_frame)
+
+    def countdown(self):
+        if self.t>0:
+            if not self.btnPressed:
+                self.lbl.config(text = str(self.t))
+            self.t -= 1
+            self.lbl.after(1000, self.countdown)
+        elif self.t == 0:
+            self.container.destroy()
+            self.btnQuit.destroy()
+            self.btnOneOut.destroy()
+            self.btnTwoOut.destroy()
+            if self.nr_frame<20:
+                self.t = 15
+                self.createNewFrame(self.nr_frame)
+            elif self.nr_frame == 20:
+
+                if self.isPlaying2:
+                    self.scorPlayer2 = self.score
+                    self.rspCorect2 = self.corecte
+
+                    self.isPlaying2 = False
+
+                    self.lblResultPlayer1 = Label(self, font=("Rokkitt", 22, "bold"), bg="#fee6cd", fg="#b05e11",
+                                          text=self.numePlayer1 +" a obtinut scorul " + str(self.scorPlayer1) + " cu "
+                                               + str(self.rspCorect1) + " intrebari corecte!")
+                    self.lblResultPlayer1.pack(pady=(100, 0))
+
+                    self.lblResultPlayer2 = Label(self, font=("Rokkitt", 22, "bold"), bg="#fee6cd", fg="#b05e11",
+                                                  text=self.numePlayer2 + " a obtinut scorul " + str(
+                                                      self.scorPlayer2) + " cu "
+                                                       + str(self.rspCorect2) + " intrebari corecte!")
+                    self.lblResultPlayer2.pack(pady=(50, 0))
+
+                    self.lblResult = Label(self, font=("Rokkitt", 24, "bold"), bg="#fee6cd", fg="green",
+                                                  text="")
+                    self.lblResult.pack(pady=(50, 0))
+
+                    if self.scorPlayer1 > self.scorPlayer2:
+                        self.lblResult.configure(text = "Castigator: " + self.numePlayer1)
+                    elif self.scorPlayer1 < self.scorPlayer2:
+                        self.lblResult.configure(text="Castigator: " + self.numePlayer2)
+                    else:
+                        if self.rspCorect1 > self.rspCorect2:
+                            self.lblResult.configure(text="Castigator: " + self.numePlayer1)
+                        elif self.rspCorect1 < self.rspCorect2:
+                            self.lblResult.configure(text="Castigator: " + self.numePlayer2)
+                        else:
+                            self.lblResult.configure(text="Remiza!")
+
+                    self.btnQuit = Button(self, compound=CENTER, height=55, image=self.imgBtnUtils, border=0,
+                                          activebackground="#fee6cd", activeforeground="#af4343",
+                                          font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                                          text="QUIT",
+                                          command=lambda: [self.abort(), app.show_frame(MainMenu), self.destroy(),
+                                                           self.kill()])
+                    self.btnQuit.bind("<Enter>", lambda event: self.btnQuit.configure(image=self.imgBtnUtilsDark))
+                    self.btnQuit.bind("<Leave>", lambda event: self.btnQuit.configure(image=self.imgBtnUtils))
+                    self.btnQuit.pack(padx=(50, 0), pady=(120, 0), side=LEFT)
+
+                if self.isPlaying1:
+                    self.scorPlayer1 = self.score
+                    self.rspCorect1 = self.corecte
+
+                    self.t = 15
+                    self.oneOutCount = 3
+                    self.twoOutCount = 2
+                    self.nr_frame = 0
+                    self.score = 0
+                    self.corecte = 0
+
+                    self.isPlaying1 = False
+                    self.isPlaying2 = True
+
+                    random.shuffle(self.indexes)
+
+                    self.lblReady = Label(self, font=("Rokkitt", 36, "bold"), bg="#fee6cd", fg="#b05e11",
+                                          text="Ready Player 2?")
+                    self.lblReady.pack(pady=(100, 0))
+
+                    self.btnGo = Button(self, compound=CENTER, height=80, image=self.imgBtnStart, border=0,
+                                        activebackground="#fee6cd", activeforeground="#af4343", text="GO",
+                                        font=("Rokkitt", 25, "bold"),
+                                        bg="#fee6cd", fg="#af4343",
+                                        command=lambda: [self.lblReady.destroy(), self.btnGo.destroy(),
+                                                         self.btnQuit.destroy(), self.createNewFrame(self.nr_frame)])
+                    self.btnGo.bind("<Enter>", lambda event: self.btnGo.configure(image=self.imgBtnStartDark))
+                    self.btnGo.bind("<Leave>", lambda event: self.btnGo.configure(image=self.imgBtnStart))
+                    self.btnGo.pack(pady=(50, 0))
+
+                    self.btnQuit = Button(self, compound=CENTER, height=55, image=self.imgBtnUtils, border=0,
+                                          activebackground="#fee6cd", activeforeground="#af4343",
+                                          font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                                          text="QUIT",
+                                          command=lambda: [self.abort(), app.show_frame(MainMenu), self.destroy(),
+                                                           self.kill()])
+                    self.btnQuit.bind("<Enter>", lambda event: self.btnQuit.configure(image=self.imgBtnUtilsDark))
+                    self.btnQuit.bind("<Leave>", lambda event: self.btnQuit.configure(image=self.imgBtnUtils))
+                    self.btnQuit.pack(padx=(50, 0), pady=(120, 0), side=LEFT)
+
+
+
+
+
+    def createNewFrame(self, number):
+        self.btnPressed = False
+        self.container = LabelFrame(self, width=920, height=630, bg="#fee6cd", border=0, relief=SUNKEN)
+        self.container.pack(pady=10)
+
+        self.lbl = Label(self.container, font=("Rokkitt", 30, "bold"), bg = "#fee6cd", fg = "#b05e11")
+        self.lbl.pack()
+
+        self.qst = Message(self.container, width = 700, justify = CENTER, font=("Rokkitt", 18), bg = "#fee6cd", fg = "#b05e11",
+                           text = self.records[self.indexes[number]][0])
+        self.qst.pack(fill = BOTH)
+
+        self.btn1 = Button(self.container, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
+                                activebackground="#fee6cd", activeforeground="#af4343",
+                                font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                           text = self.records[self.indexes[number]][1], command= lambda: self.btnClicked(self.btn1))
+        self.btn1.bind("<Enter>", lambda event: self.btn1.configure(image=self.imgBtnQstDark))
+        self.btn1.bind("<Leave>", lambda event: self.btn1.configure(image=self.imgBtnQst))
+        self.btn1.pack(pady = (30,0))
+
+        self.btn2 = Button(self.container, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
+                           activebackground="#fee6cd", activeforeground="#af4343",
+                           font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                           text=self.records[self.indexes[number]][2], command= lambda: self.btnClicked(self.btn2))
+        self.btn2.bind("<Enter>", lambda event: self.btn2.configure(image=self.imgBtnQstDark))
+        self.btn2.bind("<Leave>", lambda event: self.btn2.configure(image=self.imgBtnQst))
+        self.btn2.pack(pady = (20,0))
+
+        self.btn3 = Button(self.container, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
+                           activebackground="#fee6cd", activeforeground="#af4343",
+                           font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                           text=self.records[self.indexes[number]][3], command= lambda: self.btnClicked(self.btn3))
+        self.btn3.bind("<Enter>", lambda event: self.btn3.configure(image=self.imgBtnQstDark))
+        self.btn3.bind("<Leave>", lambda event: self.btn3.configure(image=self.imgBtnQst))
+        self.btn3.pack(pady = (20,0))
+
+        self.btn4 = Button(self.container, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
+                           activebackground="#fee6cd", activeforeground="#af4343",
+                           font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                           text=self.records[self.indexes[number]][4], command= lambda: self.btnClicked(self.btn4))
+        self.btn4.bind("<Enter>", lambda event: self.btn4.configure(image=self.imgBtnQstDark))
+        self.btn4.bind("<Leave>", lambda event: self.btn4.configure(image=self.imgBtnQst))
+        self.btn4.pack(pady = (20,0))
+
+        self.btnQuit = Button(self, compound=CENTER, height=55, image=self.imgBtnUtils, border=0,
+                              activebackground="#fee6cd", activeforeground="#af4343",
+                              font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                              text="QUIT",
+                              command=lambda: [self.abort(), app.show_frame(MainMenu), self.destroy(),
+                                               self.kill()])
+        self.btnQuit.bind("<Enter>", lambda event: self.btnQuit.configure(image=self.imgBtnUtilsDark))
+        self.btnQuit.bind("<Leave>", lambda event: self.btnQuit.configure(image=self.imgBtnUtils))
+        self.btnQuit.pack(padx = (92,30), pady=(20, 0), side=LEFT)
+
+        self.btnOneOut = Button(self, compound=CENTER, height=55, image=self.imgBtnUtils, border=0,
+                              activebackground="#fee6cd", activeforeground="#af4343",
+                              font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                              text="Eliminate 1", command = self.eliminateOne)
+        self.btnOneOut.bind("<Enter>", lambda event: self.btnOneOut.configure(image=self.imgBtnUtilsDark))
+        self.btnOneOut.bind("<Leave>", lambda event: self.btnOneOut.configure(image=self.imgBtnUtils))
+        self.btnOneOut.pack(padx=(30, 30), pady=(20, 0), side=LEFT)
+
+        if(self.oneOutCount == 0):
+            self.btnOneOut.configure(state = 'disabled')
+
+        self.btnTwoOut = Button(self, compound=CENTER, height=55, image=self.imgBtnUtils, border=0,
+                                activebackground="#fee6cd", activeforeground="#af4343",
+                                font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                                text="Eliminate 2", command = self.eliminateTwo)
+        self.btnTwoOut.bind("<Enter>", lambda event: self.btnTwoOut.configure(image=self.imgBtnUtilsDark))
+        self.btnTwoOut.bind("<Leave>", lambda event: self.btnTwoOut.configure(image=self.imgBtnUtils))
+        self.btnTwoOut.pack(padx=(30, 30), pady=(20, 0), side=LEFT)
+
+        if (self.twoOutCount == 0):
+            self.btnTwoOut.configure(state='disabled')
+
+        self.nr_frame += 1
+        self.countdown()
+
+    def btnClicked(self, btn):
+        self.btnPressed = True
+        text = self.records[self.indexes[self.nr_frame - 1]][5]
+        self.lbl.configure(text = "")
+        self.btn1['command'] = 0
+        self.btn2['command'] = 0
+        self.btn3['command'] = 0
+        self.btn4['command'] = 0
+
+        self.btn1.unbind("<Enter>")
+        self.btn2.unbind("<Enter>")
+        self.btn3.unbind("<Enter>")
+        self.btn4.unbind("<Enter>")
+        self.btn1.unbind("<Leave>")
+        self.btn2.unbind("<Leave>")
+        self.btn3.unbind("<Leave>")
+        self.btn4.unbind("<Leave>")
+
+        self.btnOneOut['state'] = 'disabled'
+        self.btnTwoOut['state'] = 'disabled'
+
+        self.btn1.configure(image=self.imgBtnQstWrong, fg = "black", activeforeground = "black", relief = SUNKEN)
+        self.btn2.configure(image=self.imgBtnQstWrong, fg = "black", activeforeground = "black", relief = SUNKEN)
+        self.btn3.configure(image=self.imgBtnQstWrong, fg = "black", activeforeground = "black", relief = SUNKEN)
+        self.btn4.configure(image=self.imgBtnQstWrong, fg = "black", activeforeground = "black", relief = SUNKEN)
+
+        if text == self.btn1['text']:
+            self.btn1.configure(image=self.imgBtnQstRight)
+        if text == self.btn2['text']:
+            self.btn2.configure(image=self.imgBtnQstRight)
+        if text == self.btn3['text']:
+            self.btn3.configure(image=self.imgBtnQstRight)
+        if text == self.btn4['text']:
+            self.btn4.configure(image=self.imgBtnQstRight)
+
+        if text == btn['text']:
+            self.score += 100
+            self.score += self.t * 10
+            self.corecte += 1
+
+        self.t = 2
+
+    def eliminateOne(self):
+        text = self.records[self.indexes[self.nr_frame - 1]][5]
+        buttons = [button for button in [self.btn1, self.btn2, self.btn3, self.btn4] if button['text'] != text]
+        index = random.randint(0,2)
+        buttons[index]['state'] = 'disabled'
+        self.oneOutCount -= 1
+        self.score -= 25
+        self.btnOneOut['state'] = 'disabled'
+        self.btnTwoOut['state'] = 'disabled'
+
+    def eliminateTwo(self):
+        text = self.records[self.indexes[self.nr_frame - 1]][5]
+        buttons = [button for button in [self.btn1, self.btn2, self.btn3, self.btn4] if button['text'] != text]
+        indexes = random.sample(range(0, 3), 2)
+        buttons[indexes[0]]['state'] = 'disabled'
+        buttons[indexes[1]]['state'] = 'disabled'
+        self.twoOutCount -= 1
+        self.score -= 50
+        self.btnOneOut['state'] = 'disabled'
+        self.btnTwoOut['state'] = 'disabled'
+
+
+    def kill(self):
+        del self
+        gc.collect()
+
+    def abort(self):
+        del app.frames[GamePvP]
+
+
+
+class GamePvPSr(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+
+        self.configure(bg = "#fee6cd")
+
+        self.numePlayer1 = ''
+        self.numePlayer2 = ''
+
+        self.rspCorect1 = 0
+        self.rspCorect2 = 0
+
+        self.rspGresit1 = 0
+        self.rspGresit2 = 0
+
+        self.nrFrame1 = 0
+        self.nrFrame2 = 0
+
+        self.quitPressed1 = False
+        self.quitPressed2 = False
+
+        self.t = 200
+
+
+
+        self.imgBtnStart = PhotoImage(file="btnStart.png")
+        self.imgBtnStartDark = PhotoImage(file="btnStartDark.png")
+        self.imgBtnQst = PhotoImage(file="btnQst.png")
+        self.imgBtnQstDark = PhotoImage(file="btnQstDark.png")
+        self.imgBtnUtils = PhotoImage(file = "btnUtils.png")
+        self.imgBtnUtilsDark = PhotoImage(file="btnUtilsDark.png")
+        self.imgBtnQstRight = PhotoImage(file = "btnQstRight.png")
+        self.imgBtnQstWrong = PhotoImage(file = "btnQstWrong.png")
+
+
+        self.conn = sqlite3.connect('mdsproject.db')
+        self.c = self.conn.cursor()
+
+        self.c.execute("SELECT * FROM biologie UNION SELECT * FROM chimie UNION SELECT * FROM arte_divertisment UNION SELECT * FROM istorie UNION SELECT * FROM geografie UNION SELECT * FROM matematica UNION SELECT * FROM sport UNION SELECT * FROM diverse")
+
+
+        self.records1 = self.c.fetchall()
+        self.records2 = copy.deepcopy(self.records1)
+
+        self.conn.commit()
+        self.conn.close()
+
+        random.shuffle(self.records1)
+        random.shuffle(self.records2)
+
+
+        self.container = LabelFrame(self,width = 920, height = 630, bg = "#fee6cd", border = 1, relief = SUNKEN)
+        self.container.pack(pady = 10)
+
+        self.lblPlayer1 = Label(self.container, text="Player 1", font=("Rokkitt", 20, "bold"), bg="#fee6cd", fg="#b05e11")
+        self.lblPlayer1.place(x=420, y=20)
+
+        self.entryPlayer1 = Entry(self.container, font=("Rokkitt", 20), fg="#b05e11")
+        self.entryPlayer1.place(x=325, y=80)
+
+        self.lblPlayer2 = Label(self.container, text="Player 2", font=("Rokkitt", 20, "bold"), bg="#fee6cd", fg="#b05e11")
+        self.lblPlayer2.place(x=420, y=140)
+
+        self.entryPlayer2 = Entry(self.container, font=("Rokkitt", 20), fg="#b05e11")
+        self.entryPlayer2.place(x=325, y=200)
+
+        self.lblWarning = Label(self, text="", font=("Rokkitt", 20, "bold"), bg="#fee6cd", fg="red")
+        self.lblWarning.place(x=340, y=320)
+
+
+        self.btnStart = Button(self.container, compound=CENTER, height=80, image=self.imgBtnStart, border=0,
+                             activebackground="#fee6cd", activeforeground="#af4343", text="START",
+                             font=("Rokkitt", 25, "bold"),
+                             bg="#fee6cd", fg="#af4343", command = self.pressStart)
+        self.btnStart.bind("<Enter>", lambda event: self.btnStart.configure(image=self.imgBtnStartDark))
+        self.btnStart.bind("<Leave>", lambda event: self.btnStart.configure(image=self.imgBtnStart))
+        self.btnStart.place(x=350, y=400)
+
+        self.lblInfo = Label(self.container, text="Player1: A,S,D,F, X-pass | Player2: H,J,K,L, M-pass", font=("Rokkitt", 20, "bold"), bg="#fee6cd", fg="#b05e11")
+        self.lblInfo.place(x = 180, y = 550)
+
+        self.lblTime = Label()
+
+        self.qstP1 = Message()
+        self.btn1P1 = Button()
+        self.btn2P1 = Button()
+        self.btn3P1 = Button()
+        self.btn4P1 = Button()
+        self.holder1 = LabelFrame()
+
+        self.qstP2 = Message()
+        self.btn1P2 = Button()
+        self.btn2P2 = Button()
+        self.btn3P2 = Button()
+        self.btn4P2 = Button()
+        self.holder2 = LabelFrame()
+
+        self.framePlayers = LabelFrame()
+
+        self.framePlayer1 = LabelFrame()
+        self.framePlayer2 = LabelFrame()
+
+        self.btnPass1 = Button()
+        self.btnPass2 = Button()
+
+        self.btnQuit = Button()
+
+
+
+    def pressStart(self):
+        numePlayer1 = self.entryPlayer1.get()
+        numePlayer2 = self.entryPlayer2.get()
+
+        if not numePlayer1 or not numePlayer2 or numePlayer1 == numePlayer2:
+            self.lblWarning.configure(text="Nume diferite obligatorii!", fg="red")
+            self.lblWarning.after(1500, lambda: self.lblWarning.configure(text=""))
+        else:
+            self.numePlayer1 = numePlayer1
+            self.numePlayer2 = numePlayer2
+            app.geometry("1500x700+10+30")
+            self.container.destroy()
+
+            self.lblTime = Label(self, font=("Rokkitt", 20, "bold"), bg="#fee6cd", fg="#b05e11", text="200")
+            self.lblTime.pack()
+
+            self.framePlayers = LabelFrame(self, width = 1500, height = 650, border = 0, bg = "#fee6cd")
+            self.framePlayers.pack(fill = BOTH, padx = 0, pady = 0, anchor = CENTER, expand = 1)
+            self.framePlayers.focus_force()
+
+            self.framePlayer1 = LabelFrame(self.framePlayers, bg = "#fee6cd", border = 1, relief = SUNKEN)
+            self.framePlayer2 = LabelFrame(self.framePlayers, bg = "#fee6cd", border = 1, relief = SUNKEN)
+
+            self.framePlayer1.grid(row=0, column=0, sticky="nsew", padx=(5,2), pady=2)
+            self.framePlayer2.grid(row=0, column=1, sticky="nsew", padx=(2,5), pady=2)
+
+            self.framePlayers.grid_columnconfigure(0, weight=1, uniform="group1")
+            self.framePlayers.grid_columnconfigure(1, weight=1, uniform="group1")
+            self.framePlayers.grid_rowconfigure(0, weight=1)
+
+            self.btnQuit = Button(self, compound=CENTER, height=55, image=self.imgBtnUtils, border=0,
+                                   activebackground="#fee6cd", activeforeground="#af4343",
+                                   font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                                   text="QUIT",
+
+                                    command=self.finish
+                                   )
+            self.btnQuit.bind("<Enter>", lambda event: self.btnQuit.configure(image=self.imgBtnUtilsDark))
+            self.btnQuit.bind("<Leave>", lambda event: self.btnQuit.configure(image=self.imgBtnUtils))
+            self.btnQuit.pack()
+
+            self.createNewFramePlayer1(self.nrFrame1)
+            self.createNewFramePlayer2(self.nrFrame2)
+            self.countdown()
+
+    def createNewFramePlayer1(self, number):
+        self.btnPressed = False
+        self.holder1 = LabelFrame(self.framePlayer1, width=920, height=630, bg="#fee6cd", border=0, relief=SUNKEN)
+        self.holder1.pack(pady=10)
+
+
+        self.qstP1 = Message(self.holder1, width=700, justify=CENTER, font=("Rokkitt", 18), bg="#fee6cd", fg="#b05e11",
+                           text=self.records1[number][0])
+        self.qstP1.pack(fill=BOTH)
+
+        self.btn1P1 = Button(self.holder1, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
+                           activebackground="#fee6cd", activeforeground="#af4343",
+                           font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                           text=self.records1[number][1], command=lambda: self.btnClicked1(self.btn1P1))
+        self.framePlayers.bind('<a>', lambda a: self.btnClicked1(self.btn1P1, a))
+        self.btn1P1.bind("<Enter>", lambda event: self.btn1P1.configure(image=self.imgBtnQstDark))
+        self.btn1P1.bind("<Leave>", lambda event: self.btn1P1.configure(image=self.imgBtnQst))
+        self.btn1P1.pack(pady=(30, 0))
+
+        self.btn2P1 = Button(self.holder1, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
+                           activebackground="#fee6cd", activeforeground="#af4343",
+                           font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                           text=self.records1[number][2], command=lambda: self.btnClicked1(self.btn2P1))
+        self.framePlayers.bind('<s>', lambda a: self.btnClicked1(self.btn2P1, a))
+        self.btn2P1.bind("<Enter>", lambda event: self.btn2P1.configure(image=self.imgBtnQstDark))
+        self.btn2P1.bind("<Leave>", lambda event: self.btn2P1.configure(image=self.imgBtnQst))
+        self.btn2P1.pack(pady=(20, 0))
+
+        self.btn3P1 = Button(self.holder1, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
+                           activebackground="#fee6cd", activeforeground="#af4343",
+                           font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                           text=self.records1[number][3], command=lambda: self.btnClicked1(self.btn3P1))
+        self.framePlayers.bind('<d>', lambda a: self.btnClicked1(self.btn3P1, a))
+        self.btn3P1.bind("<Enter>", lambda event: self.btn3P1.configure(image=self.imgBtnQstDark))
+        self.btn3P1.bind("<Leave>", lambda event: self.btn3P1.configure(image=self.imgBtnQst))
+        self.btn3P1.pack(pady=(20, 0))
+
+        self.btn4P1 = Button(self.holder1, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
+                           activebackground="#fee6cd", activeforeground="#af4343",
+                           font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                           text=self.records1[number][4], command=lambda: self.btnClicked1(self.btn4P1))
+        self.framePlayers.bind('<f>', lambda a: self.btnClicked1(self.btn4P1, a))
+        self.btn4P1.bind("<Enter>", lambda event: self.btn4P1.configure(image=self.imgBtnQstDark))
+        self.btn4P1.bind("<Leave>", lambda event: self.btn4P1.configure(image=self.imgBtnQst))
+        self.btn4P1.pack(pady=(20, 0))
+
+        self.btnPass1 = Button(self.framePlayer1, compound=CENTER, height=55, image=self.imgBtnUtils, border=0,
+                               activebackground="#fee6cd", activeforeground="#af4343",
+                               font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                               text="PASS",
+
+                                command=lambda: [self.holder1.destroy(),
+                                                self.btnPass1.destroy(),
+                                                 self.createNewFramePlayer1(self.nrFrame1)]
+                               )
+        self.framePlayers.bind('<x>', lambda a: [self.holder1.destroy(),
+                                                 self.btnPass1.destroy(),
+                                                 self.createNewFramePlayer1(self.nrFrame1)])
+        self.btnPass1.bind("<Enter>", lambda event: self.btnPass1.configure(image=self.imgBtnUtilsDark))
+        self.btnPass1.bind("<Leave>", lambda event: self.btnPass1.configure(image=self.imgBtnUtils))
+        self.btnPass1.pack(pady=(20, 0))
+
+        self.nrFrame1 += 1
+
+
+
+    def btnClicked1(self, btn, event = None):
+
+        text = self.records1[self.nrFrame1-1][5]
+        self.btn1P1['command'] = 0
+        self.btn2P1['command'] = 0
+        self.btn3P1['command'] = 0
+        self.btn4P1['command'] = 0
+
+        self.btn1P1.unbind("<Enter>")
+        self.btn2P1.unbind("<Enter>")
+        self.btn3P1.unbind("<Enter>")
+        self.btn4P1.unbind("<Enter>")
+        self.btn1P1.unbind("<Leave>")
+        self.btn2P1.unbind("<Leave>")
+        self.btn3P1.unbind("<Leave>")
+        self.btn4P1.unbind("<Leave>")
+
+
+        self.btn1P1.configure(image=self.imgBtnQstWrong, fg="black", activeforeground="black", relief=SUNKEN)
+        self.btn2P1.configure(image=self.imgBtnQstWrong, fg="black", activeforeground="black", relief=SUNKEN)
+        self.btn3P1.configure(image=self.imgBtnQstWrong, fg="black", activeforeground="black", relief=SUNKEN)
+        self.btn4P1.configure(image=self.imgBtnQstWrong, fg="black", activeforeground="black", relief=SUNKEN)
+
+        if text == self.btn1P1['text']:
+            self.btn1P1.configure(image=self.imgBtnQstRight)
+        if text == self.btn2P1['text']:
+            self.btn2P1.configure(image=self.imgBtnQstRight)
+        if text == self.btn3P1['text']:
+            self.btn3P1.configure(image=self.imgBtnQstRight)
+        if text == self.btn4P1['text']:
+            self.btn4P1.configure(image=self.imgBtnQstRight)
+
+        if text == btn['text']:
+            self.rspCorect1 += 1
+        else:
+            self.rspGresit1 += 1
+
+        self.holder1.destroy()
+        self.btnPass1.destroy()
+        self.createNewFramePlayer1(self.nrFrame1)
+
+
+
+    def createNewFramePlayer2(self, number):
+        self.btnPressed = False
+        self.holder2 = LabelFrame(self.framePlayer2, width=920, height=630, bg="#fee6cd", border=0, relief=SUNKEN)
+        self.holder2.pack(pady=10)
+
+        self.qstP2 = Message(self.holder2, width=700, justify=CENTER, font=("Rokkitt", 18), bg="#fee6cd", fg="#b05e11",
+                           text=self.records2[number][0])
+        self.qstP2.pack(fill=BOTH)
+
+        self.btn1P2 = Button(self.holder2, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
+                           activebackground="#fee6cd", activeforeground="#af4343",
+                           font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                           text=self.records2[number][1], command=lambda: self.btnClicked2(self.btn1P2))
+        self.framePlayers.bind('<h>', lambda a: self.btnClicked2(self.btn1P2, a))
+        self.btn1P2.bind("<Enter>", lambda event: self.btn1P2.configure(image=self.imgBtnQstDark))
+        self.btn1P2.bind("<Leave>", lambda event: self.btn1P2.configure(image=self.imgBtnQst))
+        self.btn1P2.pack(pady=(30, 0))
+
+        self.btn2P2 = Button(self.holder2, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
+                           activebackground="#fee6cd", activeforeground="#af4343",
+                           font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                           text=self.records2[number][2], command=lambda: self.btnClicked2(self.btn2P2))
+        self.framePlayers.bind('<j>', lambda a: self.btnClicked2(self.btn2P2, a))
+        self.btn2P2.bind("<Enter>", lambda event: self.btn2P2.configure(image=self.imgBtnQstDark))
+        self.btn2P2.bind("<Leave>", lambda event: self.btn2P2.configure(image=self.imgBtnQst))
+        self.btn2P2.pack(pady=(20, 0))
+
+        self.btn3P2 = Button(self.holder2, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
+                           activebackground="#fee6cd", activeforeground="#af4343",
+                           font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                           text=self.records2[number][3], command=lambda: self.btnClicked2(self.btn3P2))
+        self.framePlayers.bind('<k>', lambda a: self.btnClicked2(self.btn3P2, a))
+        self.btn3P2.bind("<Enter>", lambda event: self.btn3P2.configure(image=self.imgBtnQstDark))
+        self.btn3P2.bind("<Leave>", lambda event: self.btn3P2.configure(image=self.imgBtnQst))
+        self.btn3P2.pack(pady=(20, 0))
+
+        self.btn4P2 = Button(self.holder2, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
+                           activebackground="#fee6cd", activeforeground="#af4343",
+                           font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                           text=self.records2[number][4], command=lambda: self.btnClicked2(self.btn4P2))
+        self.framePlayers.bind('<l>', lambda a: self.btnClicked2(self.btn4P2, a))
+        self.btn4P2.bind("<Enter>", lambda event: self.btn4P2.configure(image=self.imgBtnQstDark))
+        self.btn4P2.bind("<Leave>", lambda event: self.btn4P2.configure(image=self.imgBtnQst))
+        self.btn4P2.pack(pady=(20, 0))
+
+
+        self.btnPass2 = Button(self.framePlayer2, compound=CENTER, height=55, image=self.imgBtnUtils, border=0,
+                               activebackground="#fee6cd", activeforeground="#af4343",
+                               font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                               text="PASS",
+
+                                command=lambda: [self.holder2.destroy(),
+                                                self.btnPass2.destroy(),
+                                                 self.createNewFramePlayer2(self.nrFrame2)]
+                               )
+        self.framePlayers.bind('<m>', lambda a: [self.holder2.destroy(),
+                                                self.btnPass2.destroy(),
+                                                 self.createNewFramePlayer2(self.nrFrame2)])
+        self.btnPass2.bind("<Enter>", lambda event: self.btnPass2.configure(image=self.imgBtnUtilsDark))
+        self.btnPass2.bind("<Leave>", lambda event: self.btnPass2.configure(image=self.imgBtnUtils))
+        self.btnPass2.pack(pady=(20, 0))
+
+        self.nrFrame2 += 1
+
+    def btnClicked2(self, btn, event = None):
+
+        text = self.records2[self.nrFrame2-1][5]
+        self.btn1P2['command'] = 0
+        self.btn2P2['command'] = 0
+        self.btn3P2['command'] = 0
+        self.btn4P2['command'] = 0
+
+        self.btn1P2.unbind("<Enter>")
+        self.btn2P2.unbind("<Enter>")
+        self.btn3P2.unbind("<Enter>")
+        self.btn4P2.unbind("<Enter>")
+        self.btn1P2.unbind("<Leave>")
+        self.btn2P2.unbind("<Leave>")
+        self.btn3P2.unbind("<Leave>")
+        self.btn4P2.unbind("<Leave>")
+
+
+        self.btn1P2.configure(image=self.imgBtnQstWrong, fg="black", activeforeground="black", relief=SUNKEN)
+        self.btn2P2.configure(image=self.imgBtnQstWrong, fg="black", activeforeground="black", relief=SUNKEN)
+        self.btn3P2.configure(image=self.imgBtnQstWrong, fg="black", activeforeground="black", relief=SUNKEN)
+        self.btn4P2.configure(image=self.imgBtnQstWrong, fg="black", activeforeground="black", relief=SUNKEN)
+
+        if text == self.btn1P2['text']:
+            self.btn1P2.configure(image=self.imgBtnQstRight)
+        if text == self.btn2P2['text']:
+            self.btn2P2.configure(image=self.imgBtnQstRight)
+        if text == self.btn3P2['text']:
+            self.btn3P2.configure(image=self.imgBtnQstRight)
+        if text == self.btn4P2['text']:
+            self.btn4P2.configure(image=self.imgBtnQstRight)
+
+        if text == btn['text']:
+            self.rspCorect2 += 1
+        else:
+            self.rspGresit2 += 1
+
+        self.holder2.destroy()
+        self.btnPass2.destroy()
+        self.createNewFramePlayer2(self.nrFrame2)
+
+
+
+    def kill(self):
+        del self
+        gc.collect()
+
+    def abort(self):
+        del app.frames[GamePvPSr]
+
+
+    def countdown(self):
+        if self.t>0:
+            self.lblTime.config(text = str(self.t))
+            self.t -= 1
+            self.lblTime.after(1000, self.countdown)
+        elif self.t == 0:
+            self.finish()
+
+    def finish(self):
+        self.lblTime.destroy()
+        self.framePlayers.destroy()
+        self.btnQuit.destroy()
+        app.geometry("950x650+200+50")
+
+        lblResultPlayer1 = Label(self, font=("Rokkitt", 22, "bold"), bg="#fee6cd", fg="#b05e11",
+                                 text=self.numePlayer1 + " a obtinut scorul : " + str(self.rspCorect1) + " corecte, "
+                                      + str(self.rspGresit1) + " gresite!")
+        lblResultPlayer1.pack(pady=(100, 0))
+
+        lblResultPlayer2 = Label(self, font=("Rokkitt", 22, "bold"), bg="#fee6cd", fg="#b05e11",
+                                 text=self.numePlayer2 + " a obtinut scorul : " + str(self.rspCorect2) + " corecte, "
+                                      + str(self.rspGresit2) + " gresite!")
+        lblResultPlayer2.pack(pady=(50, 0))
+
+        self.btnQuit = Button(self, compound=CENTER, height=55, image=self.imgBtnUtils, border=0,
+                              activebackground="#fee6cd", activeforeground="#af4343",
+                              font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
+                              text="QUIT",
+                              command=lambda: [self.abort(), app.show_frame(MainMenu), self.destroy(),
+                                               self.kill()])
+        self.btnQuit.bind("<Enter>", lambda event: self.btnQuit.configure(image=self.imgBtnUtilsDark))
+        self.btnQuit.bind("<Leave>", lambda event: self.btnQuit.configure(image=self.imgBtnUtils))
+        self.btnQuit.pack(pady=(120, 0))
 
 
 app = Root()
