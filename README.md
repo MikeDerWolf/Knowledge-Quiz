@@ -1,7 +1,7 @@
 # Knowledge-Quiz
 Python Desktop GUI Application
 Link Trello (Backlog + User Stories + Organizare): https://trello.com/b/khRKXneB/knowledge-quiz  
-Code Refactoring: UPLOADED 
+Code Refactoring: UPLOADED   
 Diagrama UML: UPLOADED  
 Bug Reporting:
 Pe parcursul proiectului nu am intalnit bug-uri numeroase, dar printre cele mai importante se regasesc:  
