@@ -1,5 +1,6 @@
 from tkinter import *
 from PIL import ImageTk, Image
+from datetime import datetime
 import pygame
 import sqlite3
 import gc
@@ -12,6 +13,9 @@ volumeLevels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 initialVolumeIndex = 4
 pygame.mixer.music.set_volume(volumeLevels[initialVolumeIndex])
 
+userLoggedIn = False
+username = ''
+userRole = ''
 
 class Root(Tk):
     def __init__(self, *args, **kwargs):
@@ -28,7 +32,7 @@ class Root(Tk):
         self.container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        self.pageList = [MainMenu, Settings, GameMode, Category]
+        self.pageList = [MainMenu, Settings, LogIn, GameMode, Category]
 
         for F in self.pageList:
             frame = F(self.container, self)
@@ -53,30 +57,40 @@ class MainMenu(Frame):
 
         self.imgBtn = PhotoImage(file = "btnMenu.png")
         self.imgBtnPress = PhotoImage(file = "btnMenuDark.png")
+        self.imgBtnSmall = PhotoImage(file = "btnMenuSmall.png")
+        self.imgBtnSmallDark = PhotoImage(file = "btnMenuSmallDark.png")
 
         self.btnPlay = Button(self, compound=CENTER, text="PLAY", font=("Rokkitt", 18, "bold"), image = self.imgBtn, borderwidth=0, fg="#68a302",
-                              bg="#fee2cd", activebackground="#fee2cd", activeforeground="#68a302", command=lambda: controller.show_frame(GameMode))  # 7eba00
+                              bg="#fee2ca", activebackground="#fee2cd", activeforeground="#68a302", command=lambda: controller.show_frame(GameMode))  # 7eba00
         self.btnPlay.bind("<Enter>", lambda event: self.btnPlay.configure(image = self.imgBtnPress))
         self.btnPlay.bind("<Leave>", lambda event: self.btnPlay.configure(image=self.imgBtn))
-        self.btnPlay.pack(pady=(225, 10), padx=30)
+        self.btnPlay.pack(pady=(210, 15), padx=30)
 
         self.btnTopScore = Button(self, compound=CENTER, text="TOP SCORE", font=("Rokkitt", 18, "bold"), image = self.imgBtn, borderwidth=0, fg="#6f54b8",
                                   bg="#fee2cd", activebackground="#fee2cd", activeforeground="#6f54b8", command=self.createTopScore)
         self.btnTopScore.bind("<Enter>", lambda event: self.btnTopScore.configure(image = self.imgBtnPress))
         self.btnTopScore.bind("<Leave>", lambda event: self.btnTopScore.configure(image=self.imgBtn))
-        self.btnTopScore.pack(pady=10, padx=30)
+        self.btnTopScore.pack(pady=(0, 15), padx=30)
+
+        self.btnLogIn = Button(self, compound=CENTER, text="LOGIN", font=("Rokkitt", 18, "bold"),
+                                  image=self.imgBtn, borderwidth=0, fg="#c49000",
+                                  bg="#fde2cf", activebackground="#fee1cf", activeforeground="#c49000",
+                                  command=self.createLogIn)
+        self.btnLogIn.bind("<Enter>", lambda event: self.btnLogIn.configure(image=self.imgBtnPress))
+        self.btnLogIn.bind("<Leave>", lambda event: self.btnLogIn.configure(image=self.imgBtn))
+        self.btnLogIn.pack(pady=(0, 15), padx=30)
 
         self.btnSettings = Button(self, compound=CENTER, text="SETTINGS", font=("Rokkitt", 18, "bold"), image = self.imgBtn, borderwidth=0, fg="#01728f",
                                   bg="#fee1cf", activebackground="#fee1cf", activeforeground="#01728f", command=lambda: controller.show_frame(Settings))
         self.btnSettings.bind("<Enter>", lambda event: self.btnSettings.configure(image = self.imgBtnPress))
         self.btnSettings.bind("<Leave>", lambda event: self.btnSettings.configure(image = self.imgBtn))
-        self.btnSettings.pack(pady=10, padx=30)
+        self.btnSettings.pack(pady=(0, 15), padx=30)
 
         self.btnExit = Button(self, compound=CENTER, text="EXIT", font=("Rokkitt", 18, "bold"), image = self.imgBtn, borderwidth=0, fg="red",
                               bg="#fee2d4", activebackground="#fee2d4", activeforeground="red", command=self.quit)
         self.btnExit.bind("<Enter>", lambda event: self.btnExit.configure(image = self.imgBtnPress))
         self.btnExit.bind("<Leave>", lambda event: self.btnExit.configure(image = self.imgBtn))
-        self.btnExit.pack(pady=10, padx=30)
+        self.btnExit.pack(pady=(0, 15), padx=30)
 
     def createTopScore(self):
         frame = TopScore(app.container, app)
@@ -84,6 +98,74 @@ class MainMenu(Frame):
         frame.grid(row=0, column=0, sticky="nsew")
         app.show_frame(TopScore)
 
+    def createStatistics(self):
+        frame = Statistics(app.container, app)
+        app.frames[Statistics] = frame
+        frame.grid(row=0, column=0, sticky="nsew")
+        app.show_frame(Statistics)
+
+    def createLogIn(self):
+        frame = LogIn(app.container, app)
+        app.frames[LogIn] = frame
+        frame.grid(row=0, column=0, sticky="nsew")
+        app.show_frame(LogIn)
+
+    def logout(self):
+        global userLoggedIn, username, userRole
+
+        app.frames[MainMenu].lblUser.destroy()
+        app.frames[MainMenu].btnPlay.destroy()
+        app.frames[MainMenu].btnSettings.destroy()
+        app.frames[MainMenu].btnTopScore.destroy()
+        app.frames[MainMenu].btnLogIn.destroy()
+        app.frames[MainMenu].btnStatistics.destroy()
+        app.frames[MainMenu].btnSuggest.destroy()
+        app.frames[MainMenu].btnReview.destroy()
+        app.frames[MainMenu].btnLogout.destroy()
+        app.frames[MainMenu].btnExit.destroy()
+
+        app.frames[MainMenu].btnPlay = Button(app.frames[MainMenu], compound=CENTER, text="PLAY", font=("Rokkitt", 18, "bold"), image=app.frames[MainMenu].imgBtn,
+                              borderwidth=0, fg="#68a302",
+                              bg="#fee2ca", activebackground="#fee2cd", activeforeground="#68a302",
+                              command=lambda: app.show_frame(GameMode))  # 7eba00
+        app.frames[MainMenu].btnPlay.bind("<Enter>", lambda event: app.frames[MainMenu].btnPlay.configure(image=app.frames[MainMenu].imgBtnPress))
+        app.frames[MainMenu].btnPlay.bind("<Leave>", lambda event: app.frames[MainMenu].btnPlay.configure(image=app.frames[MainMenu].imgBtn))
+        app.frames[MainMenu].btnPlay.pack(pady=(210, 15), padx=30)
+
+        app.frames[MainMenu].btnTopScore = Button(app.frames[MainMenu], compound=CENTER, text="TOP SCORE", font=("Rokkitt", 18, "bold"),
+                                  image=app.frames[MainMenu].imgBtn, borderwidth=0, fg="#6f54b8",
+                                  bg="#fee2cd", activebackground="#fee2cd", activeforeground="#6f54b8",
+                                  command=app.frames[MainMenu].createTopScore)
+        app.frames[MainMenu].btnTopScore.bind("<Enter>", lambda event: app.frames[MainMenu].btnTopScore.configure(image=app.frames[MainMenu].imgBtnPress))
+        app.frames[MainMenu].btnTopScore.bind("<Leave>", lambda event: app.frames[MainMenu].btnTopScore.configure(image=app.frames[MainMenu].imgBtn))
+        app.frames[MainMenu].btnTopScore.pack(pady=(0, 15), padx=30)
+
+        app.frames[MainMenu].btnLogIn = Button(app.frames[MainMenu], compound=CENTER, text="LOGIN", font=("Rokkitt", 18, "bold"),
+                               image=app.frames[MainMenu].imgBtn, borderwidth=0, fg="#c49000",
+                               bg="#fde2cf", activebackground="#fee1cf", activeforeground="#c49000",
+                               command=app.frames[MainMenu].createLogIn)
+        app.frames[MainMenu].btnLogIn.bind("<Enter>", lambda event: app.frames[MainMenu].btnLogIn.configure(image=app.frames[MainMenu].imgBtnPress))
+        app.frames[MainMenu].btnLogIn.bind("<Leave>", lambda event: app.frames[MainMenu].btnLogIn.configure(image=app.frames[MainMenu].imgBtn))
+        app.frames[MainMenu].btnLogIn.pack(pady=(0, 15), padx=30)
+
+        app.frames[MainMenu].btnSettings = Button(app.frames[MainMenu], compound=CENTER, text="SETTINGS", font=("Rokkitt", 18, "bold"),
+                                  image=app.frames[MainMenu].imgBtn, borderwidth=0, fg="#01728f",
+                                  bg="#fee1cf", activebackground="#fee1cf", activeforeground="#01728f",
+                                  command=lambda: app.show_frame(Settings))
+        app.frames[MainMenu].btnSettings.bind("<Enter>", lambda event: app.frames[MainMenu].btnSettings.configure(image=app.frames[MainMenu].imgBtnPress))
+        app.frames[MainMenu].btnSettings.bind("<Leave>", lambda event: app.frames[MainMenu].btnSettings.configure(image=app.frames[MainMenu].imgBtn))
+        app.frames[MainMenu].btnSettings.pack(pady=(0, 15), padx=30)
+
+        app.frames[MainMenu].btnExit = Button(app.frames[MainMenu], compound=CENTER, text="EXIT", font=("Rokkitt", 18, "bold"), image=app.frames[MainMenu].imgBtn,
+                              borderwidth=0, fg="red",
+                              bg="#fee2d4", activebackground="#fee2d4", activeforeground="red", command=app.frames[MainMenu].quit)
+        app.frames[MainMenu].btnExit.bind("<Enter>", lambda event: app.frames[MainMenu].btnExit.configure(image=app.frames[MainMenu].imgBtnPress))
+        app.frames[MainMenu].btnExit.bind("<Leave>", lambda event: app.frames[MainMenu].btnExit.configure(image=app.frames[MainMenu].imgBtn))
+        app.frames[MainMenu].btnExit.pack(pady=(0, 15), padx=30)
+
+        username = ''
+        userRole = ''
+        userLoggedIn = False
 
 
 class Settings(Frame):
@@ -186,14 +268,14 @@ class TopScore(Frame):
         self.conn = sqlite3.connect('mdsproject.db')
         self.c = self.conn.cursor()
 
-        self.c.execute("SELECT * FROM top_score ORDER BY score DESC")
+        self.c.execute("SELECT username, max_score FROM userinfo WHERE max_score IS NOT NULL ORDER BY max_score DESC")
         self.records = self.c.fetchall()
 
         self.conn.commit()
         self.conn.close()
 
         for i in range(len(self.records)):
-            self.scoreBox.insert(END, "  " + str(i+1) + ".     " + str(self.records[i][1]) + "          " + self.records[i][0])
+            self.scoreBox.insert(END, "  " + str(i+1) + ".     " + str(self.records[i][1]) + "        " + self.records[i][0])
 
         self.btnBack = Button(self, compound=CENTER, text="Back", image=self.imgBtnBack, border=0,
                               font=("Rokkitt", 18, "bold"),
@@ -211,6 +293,391 @@ class TopScore(Frame):
     def abort(self):
         del app.frames[TopScore]
 
+
+class Statistics(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+
+        self.backgroundImage = ImageTk.PhotoImage(Image.open("backgroundLogIn.jpg"))
+        self.backgroundLabel = Label(self, image=self.backgroundImage)
+        self.backgroundLabel.place(x=0, y=0, relwidth=1, relheight=1)
+
+        self.imgBtnBack = PhotoImage(file="btnBack.png")
+        self.imgBtnBackDark = PhotoImage(file="btnBackDark.png")
+
+        self.lblStatistics = Label(self, text="Statistics", font=("Rokkitt", 60, "bold"), bg="#fee6cd", fg="#a8b9ff")
+        self.lblStatistics.grid(row=0, column=0, columnspan = 2, padx=(315, 0), pady=(10, 0))
+
+        self.lblUser = Label(self, text="User:", font=("Rokkitt", 20, "bold"), bg="#fee6cd", fg="#b05e11")
+        self.lblUser.grid(row=1, column=0, padx=(170, 0), pady=(40, 0), sticky = E)
+
+        self.lblUserR = Label(self, text=username, font=("Rokkitt", 20, "bold"), bg="#fee6cd", fg="#d18e08")
+        self.lblUserR.grid(row=1, column=1, padx=(30, 0), pady=(40, 0))
+
+        self.lblNrMeciuri = Label(self, text="Finished games:", font=("Rokkitt", 20, "bold"), bg="#fee6cd", fg="#b05e11")
+        self.lblNrMeciuri.grid(row=2, column=0, padx=(170, 0), pady=(10, 0), sticky = E)
+
+        self.lblNrMeciuriR = Label(self, text="", font=("Rokkitt", 20, "bold"), bg="#fee6cd", fg="#4dafff")
+        self.lblNrMeciuriR.grid(row=2, column=1, padx=(30, 0), pady=(10, 0))
+
+        self.lblMaxScore = Label(self, text="Best score:", font=("Rokkitt", 20, "bold"), bg="#fee6cd",
+                                  fg="green")
+        self.lblMaxScore.grid(row=3, column=0, padx=(170, 0), pady=(10, 0), sticky = E)
+
+        self.lblMaxScoreR = Label(self, text="", font=("Rokkitt", 20, "bold"), bg="#fee6cd", fg="black")
+        self.lblMaxScoreR.grid(row=3, column=1, padx=(30, 0), pady=(10, 0))
+
+        self.lblMinScore = Label(self, text="Worst score:", font=("Rokkitt", 20, "bold"), bg="#fee6cd",
+                                 fg="red")
+        self.lblMinScore.grid(row=4, column=0, padx=(170, 0), pady=(10, 0), sticky = E)
+
+        self.lblMinScoreR = Label(self, text="", font=("Rokkitt", 20, "bold"), bg="#fee6cd", fg="black")
+        self.lblMinScoreR.grid(row=4, column=1, padx=(30, 0), pady=(10, 0))
+
+        self.lblCateg = Label(self, text="Last category played:", font=("Rokkitt", 20, "bold"), bg="#fee6cd",
+                                 fg="#b05e11")
+        self.lblCateg.grid(row=5, column=0, padx=(170, 0), pady=(10, 0), sticky = E)
+
+        self.lblCategR = Label(self, text="", font=("Rokkitt", 20, "bold"), bg="#fee6cd", fg="purple")
+        self.lblCategR.grid(row=5, column=1, padx=(30, 0), pady=(10, 0))
+
+        self.lblDate = Label(self, text="Date of last game:", font=("Rokkitt", 20, "bold"), bg="#fee6cd",
+                              fg="#b05e11")
+        self.lblDate.grid(row=6, column=0, padx=(170, 0), pady=(10, 0), sticky = E)
+
+        self.lblDateR = Label(self, text="", font=("Rokkitt", 20, "bold"), bg="#fee6cd", fg="purple")
+        self.lblDateR.grid(row=6, column=1, padx=(30, 0), pady=(10, 0))
+
+
+        self.conn = sqlite3.connect('mdsproject.db')
+        self.c = self.conn.cursor()
+
+        self.c.execute("SELECT nr_meciuri, max_score, min_score, last_categ, last_time FROM userinfo WHERE username = ?", (username,))
+        self.records = self.c.fetchall()
+
+        self.nrMeciuri = self.records[0][0]
+        self.maxScore = self.records[0][1]
+        self.minScore = self.records[0][2]
+        self.lastCateg = self.records[0][3]
+        self.lastTime = self.records[0][4]
+
+        self.lblNrMeciuriR.configure(text = str(self.nrMeciuri))
+
+        if self.maxScore == None:
+            self.lblMaxScoreR.configure(text="none")
+        else:
+            self.lblMaxScoreR.configure(text = str(self.maxScore))
+
+        if self.minScore == None:
+            self.lblMinScoreR.configure(text="none")
+        else:
+            self.lblMinScoreR.configure(text = str(self.minScore))
+
+        if self.lastCateg == None:
+            self.lblCategR.configure(text="none")
+        else:
+            self.lblCategR.configure(text =self.lastCateg)
+
+        if self.lastTime == None:
+            self.lblDateR.configure(text="none")
+        else:
+            self.lblDateR.configure(text =self.lastTime)
+
+        self.conn.commit()
+        self.conn.close()
+
+
+        self.btnBack = Button(self, compound=CENTER, text="Back", image=self.imgBtnBack, border=0,
+                              font=("Rokkitt", 18, "bold"),
+                              bg="#fee6cd", fg="black", activebackground="#fee6cd", activeforeground="black",
+                              command=lambda: [self.abort(), controller.show_frame(MainMenu), self.destroy(),
+                                               self.kill()])
+        self.btnBack.bind("<Enter>", lambda event: self.btnBack.configure(image=self.imgBtnBackDark))
+        self.btnBack.bind("<Leave>", lambda event: self.btnBack.configure(image=self.imgBtnBack))
+        self.btnBack.grid(row=7, column=0, padx=(30, 0), pady=(70, 0), sticky = W)
+
+    def kill(self):
+        del self
+        gc.collect()
+
+    def abort(self):
+        del app.frames[Statistics]
+
+
+
+class LogIn(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+
+        self.imgBtnBack = PhotoImage(file="btnBack.png")
+        self.imgBtnBackDark = PhotoImage(file="btnBackDark.png")
+
+        self.imgBtnLogin = PhotoImage(file="btnLogin.png")
+        self.imgBtnLoginDark = PhotoImage(file="btnLoginDark.png")
+
+        self.backgroundImage = ImageTk.PhotoImage(Image.open("backgroundLogIn.jpg"))
+        self.backgroundLabel = Label(self, image=self.backgroundImage)
+        self.backgroundLabel.place(x=0, y=0, relwidth=1, relheight=1)
+
+        self.lblLogIn = Label(self, text = "Login Credentials", font=("Rokkitt", 26, "bold"), bg = "#fee6cd", fg = "#b05e11")
+        self.lblLogIn.grid(row=0, column=0, columnspan=2, padx=(310, 0), pady=(10, 0))
+
+        self.lblUser1 = Label(self, text="Username", font=("Rokkitt", 16, "bold"), bg="#fee6cd", fg="#b05e11")
+        self.lblUser1.grid(row=1, column=0, padx=(300, 0), pady=(10, 0))
+
+        self.entryUser1 = Entry(self, font=("Rokkitt", 16), fg="#b05e11")
+        self.entryUser1.grid(row=1, column=1, padx=(20, 0), pady=(10, 0))
+
+        self.lblPass1 = Label(self, text="Password", font=("Rokkitt", 16, "bold"), bg="#fee6cd", fg="#b05e11")
+        self.lblPass1.grid(row=2, column=0, padx=(300, 0), pady=(10, 0))
+
+        self.entryPass1 = Entry(self, font=("Rokkitt", 16), fg="#b05e11")
+        self.entryPass1.grid(row=2, column=1, padx=(20, 0), pady=(10, 0))
+
+        self.lblWarning1 = Label(self, text="", font=("Rokkitt", 16, "bold"), bg="#fee6cd", fg="red")
+        self.lblWarning1.grid(row=3, column=0, columnspan=2, padx=(300, 0), pady=(10, 0))
+
+        self.btnLogIn = Button(self, compound=CENTER, text="Login", image=self.imgBtnLogin, border=0,
+                              font=("Rokkitt", 16, "bold"),
+                              bg="#fee6cd", fg="black", activebackground="#fee6cd", activeforeground="black",
+                               command = self.login
+                              )
+        self.btnLogIn.bind("<Enter>", lambda event: self.btnLogIn.configure(image=self.imgBtnLoginDark))
+        self.btnLogIn.bind("<Leave>", lambda event: self.btnLogIn.configure(image=self.imgBtnLogin))
+        self.btnLogIn.grid(row=4, column=0, columnspan=2, padx=(300, 0), pady=(10, 0))
+
+        self.lblSignUp = Label(self, text="Sign Up Credentials", font=("Rokkitt", 26, "bold"), bg="#fee6cd", fg="#b05e11")
+        self.lblSignUp.grid(row=5, column=0, columnspan=2, padx=(310, 0), pady=(10, 0))
+
+        self.lblUser2 = Label(self, text="Username", font=("Rokkitt", 16, "bold"), bg="#fee6cd", fg="#b05e11")
+        self.lblUser2.grid(row=6, column=0, padx=(300, 0), pady=(10, 0))
+
+        self.entryUser2 = Entry(self, font=("Rokkitt", 16), fg="#b05e11")
+        self.entryUser2.grid(row=6, column=1, padx=(20, 0), pady=(10, 0))
+
+        self.lblPass2 = Label(self, text="Password", font=("Rokkitt", 16, "bold"), bg="#fee6cd", fg="#b05e11")
+        self.lblPass2.grid(row=7, column=0, padx=(300, 0), pady=(10, 0))
+
+        self.entryPass2 = Entry(self, font=("Rokkitt", 16), fg="#b05e11")
+        self.entryPass2.grid(row=7, column=1, padx=(20, 0), pady=(10, 0))
+
+        self.lblWarning2 = Label(self, text="", font=("Rokkitt", 16, "bold"), bg="#fee6cd", fg="red")
+        self.lblWarning2.grid(row=8, column=0, columnspan=2, padx=(300, 0), pady=(10, 0))
+
+        self.btnSignUp = Button(self, compound=CENTER, text="Sign Up", image=self.imgBtnLogin, border=0,
+                               font=("Rokkitt", 16, "bold"),
+                               bg="#fee6cd", fg="black", activebackground="#fee6cd", activeforeground="black",
+                                command = self.signup
+                               )
+        self.btnSignUp.bind("<Enter>", lambda event: self.btnSignUp.configure(image=self.imgBtnLoginDark))
+        self.btnSignUp.bind("<Leave>", lambda event: self.btnSignUp.configure(image=self.imgBtnLogin))
+        self.btnSignUp.grid(row=9, column=0, columnspan=2, padx=(300, 0), pady=(10, 0))
+
+        self.btnBack = Button(self, compound = CENTER, text = "Back", image = self.imgBtnBack, border = 0, font=("Rokkitt", 18, "bold"),
+                              bg = "#fee6cd", fg="black", activebackground = "#fee6cd", activeforeground = "black",
+                              command=lambda: [self.abort(), controller.show_frame(MainMenu), self.destroy(),
+                                               self.kill()])
+        self.btnBack.bind("<Enter>", lambda event: self.btnBack.configure(image=self.imgBtnBackDark))
+        self.btnBack.bind("<Leave>", lambda event: self.btnBack.configure(image=self.imgBtnBack))
+        self.btnBack.grid(row=10, column=0, padx = (30,0), pady = (39,0), sticky = W)
+
+    def signup(self):
+        user = self.entryUser2.get()
+        passw = self.entryPass2.get()
+
+        if not user or not passw:
+            self.lblWarning2.configure(text = "Camp gol!", fg="red")
+            self.lblWarning2.after(1500, lambda: self.lblWarning2.configure(text = ""))
+        else:
+            if len(passw)<6 or (user[0] == ' ' or user[len(user)-1] == ' ') or (' ' in passw):
+                if len(passw)<6:
+                    self.lblWarning2.configure(text="Parola necesita minim 6 caractere!", fg="red")
+                    self.lblWarning2.after(1500, lambda: self.lblWarning2.configure(text=""))
+                if user[0] == ' ' or user[len(user)-1] == ' ':
+                    self.lblWarning2.configure(text="Fara spatiu la inceput si sfarsit!", fg="red")
+                    self.lblWarning2.after(1500, lambda: self.lblWarning2.configure(text=""))
+                if ' ' in passw:
+                    self.lblWarning2.configure(text="Parola nu trebuie sa contina spatii!", fg="red")
+                    self.lblWarning2.after(1500, lambda: self.lblWarning2.configure(text=""))
+            else:
+                conn = sqlite3.connect('mdsproject.db')
+                c = conn.cursor()
+
+                c.execute("SELECT * FROM userinfo WHERE username = ?", (user,))
+                records = c.fetchall()
+
+                conn.commit()
+                conn.close()
+
+                if len(records) != 0:
+                    self.lblWarning2.configure(text="Utilizatorul exista deja!", fg="red")
+                    self.lblWarning2.after(1500, lambda: self.lblWarning2.configure(text=""))
+                else:
+                    conn = sqlite3.connect('mdsproject.db')
+                    c = conn.cursor()
+
+                    c.execute("INSERT INTO userinfo VALUES (:username, :password, :role, :nr_meciuri, :max_score, :min_score, :last_categ, :last_time)",
+                                   {
+                                       'username': user,
+                                       'password': passw,
+                                       'role': 'user',
+                                       'nr_meciuri': 0,
+                                       'max_score': None,
+                                       'min_score': None,
+                                       'last_categ': None,
+                                       'last_time': None,
+                                   }
+                                   )
+
+                    self.lblWarning2.configure(text="Inregistrare efectuata!", fg="green")
+                    self.lblWarning2.after(1500, lambda: self.lblWarning2.configure(text=""))
+
+                    conn.commit()
+                    conn.close()
+
+
+    def login(self):
+        global userLoggedIn, username, userRole
+        user = self.entryUser1.get()
+        passw = self.entryPass1.get()
+        if not user or not passw:
+            self.lblWarning1.configure(text = "Camp gol!", fg="red")
+            self.lblWarning1.after(1500, lambda: self.lblWarning1.configure(text = ""))
+        else:
+            conn = sqlite3.connect('mdsproject.db')
+            c = conn.cursor()
+
+            c.execute("SELECT username, password, role FROM userinfo WHERE username = ?", (user,))
+            records = c.fetchall()
+
+            conn.commit()
+            conn.close()
+
+            if len(records) == 0:
+                self.lblWarning1.configure(text="Utilizator inexistent!", fg="red")
+                self.lblWarning1.after(1500, lambda: self.lblWarning1.configure(text=""))
+            else:
+                if passw != records[0][1]:
+                    self.lblWarning1.configure(text="Parola incorecta!", fg="red")
+                    self.lblWarning1.after(1500, lambda: self.lblWarning1.configure(text=""))
+                else:
+                    userLoggedIn = True
+                    username = user
+                    userRole = records[0][2]
+
+                    app.frames[MainMenu].btnPlay.destroy()
+                    app.frames[MainMenu].btnSettings.destroy()
+                    app.frames[MainMenu].btnTopScore.destroy()
+                    app.frames[MainMenu].btnLogIn.destroy()
+                    app.frames[MainMenu].btnExit.destroy()
+
+                    app.frames[MainMenu].lblUser = Label(app.frames[MainMenu], text="Connected as " + username, font=("Rokkitt", 16, "bold"), bg="#cddbfe", fg="#b05e11")
+                    app.frames[MainMenu].lblUser.grid(row=0, column=0, columnspan = 2, pady=(200, 30), padx=(205, 0))
+
+                    app.frames[MainMenu].btnPlay = Button(app.frames[MainMenu], compound=CENTER, text="PLAY",
+                                                            font=("Rokkitt", 18, "bold"), image=app.frames[MainMenu].imgBtnSmall,
+                                                            borderwidth=0, fg="#68a302",
+                                                            bg="#fee1c7", activebackground="#fee1c7", activeforeground="#68a302",
+                                                            command = lambda: app.show_frame(GameMode))
+                    app.frames[MainMenu].btnPlay.bind("<Enter>", lambda event: app.frames[MainMenu].btnPlay.configure(
+                        image=app.frames[MainMenu].imgBtnSmallDark))
+                    app.frames[MainMenu].btnPlay.bind("<Leave>", lambda event: app.frames[MainMenu].btnPlay.configure(
+                        image=app.frames[MainMenu].imgBtnSmall))
+                    app.frames[MainMenu].btnPlay.grid(row = 1, column = 0, pady=(0, 15), padx=(235, 0))
+
+                    app.frames[MainMenu].btnTopScore = Button(app.frames[MainMenu], compound=CENTER, text="TOP SCORE",
+                                                          font=("Rokkitt", 18, "bold"), image=app.frames[MainMenu].imgBtnSmall,
+                                                          borderwidth=0, fg="#6f54b8",
+                                                          bg="#fde2c7", activebackground="#fde2c7", activeforeground="#6f54b8",
+                                                          command=lambda: app.frames[MainMenu].createTopScore())
+                    app.frames[MainMenu].btnTopScore.bind("<Enter>", lambda event: app.frames[MainMenu].btnTopScore.configure(
+                        image=app.frames[MainMenu].imgBtnSmallDark))
+                    app.frames[MainMenu].btnTopScore.bind("<Leave>", lambda event: app.frames[MainMenu].btnTopScore.configure(
+                        image=app.frames[MainMenu].imgBtnSmall))
+                    app.frames[MainMenu].btnTopScore.grid(row=2, column=0, pady=(0, 15), padx=(235, 0))
+
+                    app.frames[MainMenu].btnSettings = Button(app.frames[MainMenu], compound=CENTER, text="SETTINGS",
+                                                              font=("Rokkitt", 18, "bold"), image=app.frames[MainMenu].imgBtnSmall,
+                                                              borderwidth=0, fg="#01728f",
+                                                              bg="#fee2cc", activebackground="#fee2cc", activeforeground="#01728f",
+                                                              command=lambda: app.show_frame(Settings))
+                    app.frames[MainMenu].btnSettings.bind("<Enter>", lambda event: app.frames[MainMenu].btnSettings.configure(
+                        image=app.frames[MainMenu].imgBtnSmallDark))
+                    app.frames[MainMenu].btnSettings.bind("<Leave>", lambda event: app.frames[MainMenu].btnSettings.configure(
+                        image=app.frames[MainMenu].imgBtnSmall))
+                    app.frames[MainMenu].btnSettings.grid(row=3, column=0, pady=(0, 15), padx=(235, 0))
+
+                    app.frames[MainMenu].btnStatistics = Button(app.frames[MainMenu], compound=CENTER, text="STATISTICS",
+                                                                font=("Rokkitt", 18, "bold"),
+                                                                image=app.frames[MainMenu].imgBtnSmall,
+                                                                borderwidth=0, fg="#cf00c8",
+                                                                bg="#fde2cf", activebackground="#fde2cf", activeforeground="#cf00c8",
+                                                                command=app.frames[MainMenu].createStatistics)
+                    app.frames[MainMenu].btnStatistics.bind("<Enter>", lambda event: app.frames[MainMenu].btnStatistics.configure(
+                        image=app.frames[MainMenu].imgBtnSmallDark))
+                    app.frames[MainMenu].btnStatistics.bind("<Leave>", lambda event: app.frames[MainMenu].btnStatistics.configure(
+                        image=app.frames[MainMenu].imgBtnSmall))
+                    app.frames[MainMenu].btnStatistics.grid(row=1, column=1, pady=(0, 15), padx=30)
+
+                    app.frames[MainMenu].btnSuggest = Button(app.frames[MainMenu], compound=CENTER, text="SUGGEST",
+                                                              font=("Rokkitt", 18, "bold"), image=app.frames[MainMenu].imgBtnSmall,
+                                                              borderwidth=0, fg="#b0b315",
+                                                              bg="#fee3d2", activebackground="#fee3d2", activeforeground="#b0b315",
+                                                              command=lambda: app.show_frame(GameMode))
+                    app.frames[MainMenu].btnSuggest.bind("<Enter>", lambda event: app.frames[MainMenu].btnSuggest.configure(
+                        image=app.frames[MainMenu].imgBtnSmallDark))
+                    app.frames[MainMenu].btnSuggest.bind("<Leave>", lambda event: app.frames[MainMenu].btnSuggest.configure(
+                        image=app.frames[MainMenu].imgBtnSmall))
+
+
+                    app.frames[MainMenu].btnReview = Button(app.frames[MainMenu], compound=CENTER, text="REVIEW",
+                                                             font=("Rokkitt", 18, "bold"), image=app.frames[MainMenu].imgBtnSmall,
+                                                             borderwidth=0, fg="#b0b315",
+                                                             bg="#fee3d2", activebackground="#fee3d2", activeforeground="#b0b315",
+                                                             command=lambda: app.show_frame(GameMode))
+                    app.frames[MainMenu].btnReview.bind("<Enter>", lambda event: app.frames[MainMenu].btnReview.configure(
+                        image=app.frames[MainMenu].imgBtnSmallDark))
+                    app.frames[MainMenu].btnReview.bind("<Leave>", lambda event: app.frames[MainMenu].btnReview.configure(
+                        image=app.frames[MainMenu].imgBtnSmall))
+
+                    if userRole == 'user':
+                        app.frames[MainMenu].btnSuggest.grid(row=2, column=1, pady=(0, 15), padx=30)
+                    else:
+                        app.frames[MainMenu].btnReview.grid(row=2, column=1, pady=(0, 15), padx=30)
+
+
+
+                    app.frames[MainMenu].btnLogout = Button(app.frames[MainMenu], compound=CENTER, text="LOGOUT",
+                                                            font=("Rokkitt", 18, "bold"), image=app.frames[MainMenu].imgBtnSmall,
+                                                            borderwidth=0, fg="#c49000",
+                                                            bg="#fee2d4", activebackground="#fee2d4", activeforeground="#c49000",
+                                                            command=app.frames[MainMenu].logout)
+                    app.frames[MainMenu].btnLogout.bind("<Enter>", lambda event: app.frames[MainMenu].btnLogout.configure(
+                        image=app.frames[MainMenu].imgBtnSmallDark))
+                    app.frames[MainMenu].btnLogout.bind("<Leave>", lambda event: app.frames[MainMenu].btnLogout.configure(
+                        image=app.frames[MainMenu].imgBtnSmall))
+                    app.frames[MainMenu].btnLogout.grid(row=3, column=1, pady=(0, 15), padx=30)
+
+                    app.frames[MainMenu].btnExit = Button(app.frames[MainMenu], compound=CENTER, text="EXIT",
+                                                          font=("Rokkitt", 18, "bold"), image=app.frames[MainMenu].imgBtnSmall,
+                                                          borderwidth=0, fg="red",
+                                                          bg="#fde2d1", activebackground="#fde2d1", activeforeground="red",
+                                                          command=app.frames[MainMenu].quit)
+                    app.frames[MainMenu].btnExit.bind("<Enter>", lambda event: app.frames[MainMenu].btnExit.configure(
+                        image=app.frames[MainMenu].imgBtnSmallDark))
+                    app.frames[MainMenu].btnExit.bind("<Leave>", lambda event: app.frames[MainMenu].btnExit.configure(
+                        image=app.frames[MainMenu].imgBtnSmall))
+                    app.frames[MainMenu].btnExit.grid(row=4, column=0, columnspan=2, pady=(0, 15), padx=(205, 0))
+
+                    app.show_frame(MainMenu)
+
+
+    def kill(self):
+        del self
+        gc.collect()
+
+    def abort(self):
+        del app.frames[LogIn]
 
 
 class GameMode(Frame):
@@ -388,6 +855,7 @@ class Category(Frame):
 
 
 class Game(Frame):
+    categ = ''
     def __init__(self, parent, controller, category):
         Frame.__init__(self, parent)
 
@@ -398,6 +866,7 @@ class Game(Frame):
         self.twoOutCount = 2
         self.nr_frame = 0
         self.score = 0
+        self.categ = category
 
         self.imgBtnStart = PhotoImage(file="btnStart.png")
         self.imgBtnStartDark = PhotoImage(file="btnStartDark.png")
@@ -475,22 +944,71 @@ class Game(Frame):
                                       text="Your Score: " + str(self.score))
                 self.lblScore.pack(pady=(50,0))
 
-                self.lblName = Label(self, font=("Rokkitt", 30, "bold"), bg="#fee6cd", fg="#b05e11",
-                                      text="Enter your name:")
-                self.lblName.pack(pady=(30, 0))
+                if not userLoggedIn:
+                    self.lblMsg1 = Label(self, font=("Rokkitt", 24, "bold"), bg="#fee6cd", fg="red", #b05e11
+                                          text="Nu sunteti autentificat!")
+                    self.lblMsg1.pack(pady=(40, 0))
 
-                self.entry = Entry(self,font=("Rokkitt", 20), fg = "#b05e11")
-                self.entry.pack(pady = (30,0))
+                    self.lblMsg2 = Label(self, font=("Rokkitt", 24, "bold"), bg="#fee6cd", fg="red",
+                                         text="Pentru a va salva scorul trebuie sa fiti autentificat!")
+                    self.lblMsg2.pack(pady=(10, 0))
+                else:
+                    self.conn = sqlite3.connect('mdsproject.db')
+                    self.c = self.conn.cursor()
 
-                self.btnSubmit = Button(self, compound=CENTER, height=55, image=self.imgBtnUtils, border=0,
-                                      activebackground="#fee6cd", activeforeground="#af4343",
-                                      font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                                      text="SUBMIT",
-                                      command=lambda: [self.saveScore(), self.abort(), app.show_frame(MainMenu), self.destroy(),
-                                               self.kill()])
-                self.btnSubmit.bind("<Enter>", lambda event: self.btnSubmit.configure(image=self.imgBtnUtilsDark))
-                self.btnSubmit.bind("<Leave>", lambda event: self.btnSubmit.configure(image=self.imgBtnUtils))
-                self.btnSubmit.pack(pady=(30, 0))
+                    self.c.execute("SELECT nr_meciuri, max_score, min_score FROM userinfo WHERE username = ?", (username,))
+                    self.records = self.c.fetchall()
+
+                    self.nrMeciuri = self.records[0][0]
+                    self.maxScore = self.records[0][1]
+                    self.minScore = self.records[0][2]
+
+                    self.conn.commit()
+                    self.conn.close()
+
+                    self.nrMeciuri += 1
+
+                    if self.maxScore == None or self.minScore == None:
+                        self.lblMsg1 = Label(self, font=("Rokkitt", 26, "bold"), bg="#fee6cd", fg="green",  # b05e11
+                                             text="Primul scor obtinut!")
+                        self.lblMsg1.pack(pady=(50, 0))
+
+                        self.lblMsg2 = Label(self, font=("Rokkitt", 26, "bold"), bg="#fee6cd", fg="green",
+                                             text="Felicitari!")
+                        self.lblMsg2.pack(pady=(10, 0))
+
+                        self.maxScore = self.score
+                        self.minScore = self.score
+
+                    elif self.score <= self.maxScore:
+                        self.lblMsg = Label(self, font=("Rokkitt", 26, "bold"), bg="#fee6cd", fg="red",  # b05e11
+                                             text="Nu ati reusit sa va depasiti recordul de: " + str(self.maxScore))
+                        self.lblMsg.pack(pady=(50, 0))
+
+                        if self.score < self.minScore:
+                            self.minScore = self.score
+
+                    elif self.score > self.maxScore:
+                        self.lblMsg = Label(self, font=("Rokkitt", 26, "bold"), bg="#fee6cd", fg="green",  # b05e11
+                                            text="V-ati depasit recordul de: " + str(self.maxScore))
+                        self.lblMsg.pack(pady=(50, 0))
+
+                        self.maxScore = self.score
+
+
+                    crtTime = datetime.now().strftime("%d/%m/%Y %H:%M")
+
+                    self.conn = sqlite3.connect('mdsproject.db')
+                    self.c = self.conn.cursor()
+
+                    self.c.execute(
+                        "UPDATE userinfo SET nr_meciuri = ?, max_score = ?, min_score = ?, last_categ = ?, last_time = ? WHERE username = ?",
+                        (self.nrMeciuri, self.maxScore, self.minScore, self.categ, crtTime, username)
+                        )
+
+                    self.conn.commit()
+                    self.conn.close()
+
 
                 self.btnQuit = Button(self, compound=CENTER, height=55, image=self.imgBtnUtils, border=0,
                                       activebackground="#fee6cd", activeforeground="#af4343",
@@ -580,52 +1098,6 @@ class Game(Frame):
 
         self.nr_frame += 1
         self.countdown()
-    """
-    def btnClicked1(self):
-        text = self.records[self.indexes[self.nr_frame-1]][5]
-        if text == self.btn1['text']:
-            self.score += 100
-            self.score += self.t * 10
-        self.btn1['state'] = 'disabled'
-        self.btn2['state'] = 'disabled'
-        self.btn3['state'] = 'disabled'
-        self.btn4['state'] = 'disabled'
-        self.t = 2
-
-    def btnClicked2(self):
-        text = self.records[self.indexes[self.nr_frame-1]][5]
-        if text == self.btn2['text']:
-            self.score += 100
-            self.score += self.t * 10
-        self.btn1['state'] = 'disabled'
-        self.btn2['state'] = 'disabled'
-        self.btn3['state'] = 'disabled'
-        self.btn4['state'] = 'disabled'
-        self.t = 2
-
-    def btnClicked3(self):
-        text = self.records[self.indexes[self.nr_frame-1]][5]
-        if text == self.btn3['text']:
-            self.score += 100
-            self.score += self.t * 10
-        self.btn1['state'] = 'disabled'
-        self.btn2['state'] = 'disabled'
-        self.btn3['state'] = 'disabled'
-        self.btn4['state'] = 'disabled'
-        self.t = 2
-
-    def btnClicked4(self):
-        text = self.records[self.indexes[self.nr_frame-1]][5]
-        if text == self.btn4['text']:
-            self.score += 100
-            self.score += self.t * 10
-        self.btn1['state'] = 'disabled'
-        self.btn2['state'] = 'disabled'
-        self.btn3['state'] = 'disabled'
-        self.btn4['state'] = 'disabled'
-        self.t = 2
-    """
-
 
     def btnClicked(self, btn):
         self.btnPressed = True
@@ -690,7 +1162,6 @@ class Game(Frame):
         self.btnTwoOut['state'] = 'disabled'
 
 
-
     def kill(self):
         del self
         gc.collect()
@@ -698,24 +1169,6 @@ class Game(Frame):
     def abort(self):
         del app.frames[Game]
 
-    def saveScore(self):
-        self.conn = sqlite3.connect('mdsproject.db')
-        self.c = self.conn.cursor()
-
-        text = self.entry.get()
-        if text == "":
-            text = "-"
-
-        self.c.execute("INSERT INTO top_score VALUES (:user, :score)",
-                       {
-                           'user' : text,
-                           'score' : self.score
-                       }
-                       )
-        self.records = self.c.fetchall()
-
-        self.conn.commit()
-        self.conn.close()
 
 
 app = Root()
