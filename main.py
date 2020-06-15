@@ -32,7 +32,7 @@ class Root(Tk):
         self.container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        self.pageList = [MainMenu, Settings, LogIn, GameMode, Category]
+        self.pageList = [MainMenu, Settings, LogIn, GameMode, Category, CategorySuggest]
 
         for F in self.pageList:
             frame = F(self.container, self)
@@ -405,6 +405,401 @@ class Statistics(Frame):
 
 
 
+class Review(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+
+        self.configure(bg = "#fee6cd")
+
+        self.imgBtnBack = PhotoImage(file="btnBack.png")
+        self.imgBtnBackDark = PhotoImage(file="btnBackDark.png")
+        self.imgBtnSmall = PhotoImage(file="btnMenuSmall.png")
+        self.imgBtnSmallDark = PhotoImage(file="btnMenuSmallDark.png")
+
+
+        self.qstFrame = LabelFrame(self, bg = "#cddbfe", relief = RAISED, width = 900, height = 550)
+        self.qstFrame.grid(row = 0, column = 0, columnspan = 2, padx = (30, 0), pady = (20, 0))
+
+        self.scroll1 = Scrollbar(self.qstFrame, bg = "#cddbfe")
+        self.scroll1.pack(side = RIGHT, fill = Y)
+
+        self.scroll2 = Scrollbar(self.qstFrame, bg="#cddbfe", orient = HORIZONTAL)
+        self.scroll2.pack(side = BOTTOM, fill = X)
+
+        self.qstBox = Listbox(self.qstFrame, width = 66, height = 11, font=("Rokkitt", 18), bg = "#ffdfbe", fg = "#7d3b00",
+                                yscrollcommand = self.scroll1.set, xscrollcommand = self.scroll2.set, selectmode = SINGLE)
+        self.qstBox.pack(side = LEFT)
+
+        self.scroll1.configure(command = self.qstBox.yview)
+        self.scroll2.configure(command=self.qstBox.xview)
+
+        self.conn = sqlite3.connect('mdsproject.db')
+        self.c = self.conn.cursor()
+
+        self.c.execute("SELECT * FROM suggested_qst")
+        self.records = self.c.fetchall()
+
+        self.conn.commit()
+        self.conn.close()
+
+        for i in range(len(self.records)):
+            self.qstBox.insert(END, "  ID: " + str(self.records[i][0]) + " |  Categoria:  " + self.records[i][1] + "  | " +
+                               " " + self.records[i][2] + " | {" +
+                                self.records[i][3] + " | " +
+                                self.records[i][4] + " | " +
+                                self.records[i][5] + " | " +
+                                self.records[i][6] + "} | " +
+                               " Numar raspuns corect: " + str(self.records[i][7]) +"   ")
+
+        self.btnYes = Button(self, compound=CENTER, text="YES", image=self.imgBtnSmall, border=0,
+                              font=("Rokkitt", 16, "bold"),
+                              bg="#fee6cd", fg="green", activebackground="#fee6cd", activeforeground="green",
+                              command = self.yesAction)
+        self.btnYes.bind("<Enter>", lambda event: self.btnYes.configure(image=self.imgBtnSmallDark))
+        self.btnYes.bind("<Leave>", lambda event: self.btnYes.configure(image=self.imgBtnSmall))
+        self.btnYes.grid(row=1, column=0, padx=(0, 10), pady=(20, 0), sticky = E)
+
+        self.btnNo = Button(self, compound=CENTER, text="NO", image=self.imgBtnSmall, border=0,
+                              font=("Rokkitt", 16, "bold"),
+                              bg="#fee6cd", fg="red", activebackground="#fee6cd", activeforeground="red",
+                              command = self.noAction)
+        self.btnNo.bind("<Enter>", lambda event: self.btnNo.configure(image=self.imgBtnSmallDark))
+        self.btnNo.bind("<Leave>", lambda event: self.btnNo.configure(image=self.imgBtnSmall))
+        self.btnNo.grid(row=1, column=1, padx=(10, 0), pady=(20, 0), sticky = W)
+
+        self.btnBack = Button(self, compound=CENTER, text="Back", image=self.imgBtnBack, border=0,
+                              font=("Rokkitt", 18, "bold"),
+                              bg="#fee6cd", fg="black", activebackground="#fee6cd", activeforeground="black",
+                              command=lambda: [self.abort(), controller.show_frame(MainMenu), self.destroy(),
+                                               self.kill()])
+        self.btnBack.bind("<Enter>", lambda event: self.btnBack.configure(image=self.imgBtnBackDark))
+        self.btnBack.bind("<Leave>", lambda event: self.btnBack.configure(image=self.imgBtnBack))
+        self.btnBack.grid(row=2, column=0, padx=(30, 75), pady=(46, 0), sticky = W)
+
+    def noAction(self):
+        if self.qstBox.curselection():
+            s = self.qstBox.get(self.qstBox.curselection())
+            i = 6
+            nr = ''
+            while s[i].isdigit():
+                nr += s[i]
+                i += 1
+            nr = int(nr)
+
+            self.conn = sqlite3.connect('mdsproject.db')
+            self.c = self.conn.cursor()
+
+            self.c.execute("DELETE FROM suggested_qst where id = ?", (nr,))
+
+            self.conn.commit()
+            self.conn.close()
+
+            self.abort()
+            self.destroy()
+            self.kill()
+            app.frames[LogIn].createReview()
+
+    def yesAction(self):
+        if self.qstBox.curselection():
+            s = self.qstBox.get(self.qstBox.curselection())
+            i = 6
+            nr = ''
+            while s[i].isdigit():
+                nr += s[i]
+                i += 1
+            nr = int(nr)
+
+            self.conn = sqlite3.connect('mdsproject.db')
+            self.c = self.conn.cursor()
+
+            self.c.execute("SELECT * FROM suggested_qst WHERE id = ?", (nr,))
+
+            self.records = self.c.fetchall()
+
+            categ = self.records[0][1]
+            qst = self.records[0][2]
+            ans1 = self.records[0][3]
+            ans2 = self.records[0][4]
+            ans3 = self.records[0][5]
+            ans4 = self.records[0][6]
+            crr_ans = int(self.records[0][7])
+
+            self.conn.commit()
+            self.conn.close()
+
+            self.conn = sqlite3.connect('mdsproject.db')
+            self.c = self.conn.cursor()
+
+            self.c.execute(
+                "INSERT INTO " + categ + " (question, ans1, ans2, ans3, ans4, correct_ans) VALUES (?,?,?,?,?,?)",
+                (qst, ans1, ans2, ans3, ans4, self.records[0][crr_ans+2])
+            )
+
+
+            self.conn.commit()
+            self.conn.close()
+
+            self.conn = sqlite3.connect('mdsproject.db')
+            self.c = self.conn.cursor()
+
+            self.c.execute("DELETE FROM suggested_qst where id = ?", (nr,))
+
+            self.conn.commit()
+            self.conn.close()
+
+
+            self.abort()
+            self.destroy()
+            self.kill()
+            app.frames[LogIn].createReview()
+
+    def kill(self):
+        del self
+        gc.collect()
+
+    def abort(self):
+        del app.frames[Review]
+
+
+
+class CategorySuggest(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+
+        self.configure(bg = "#fee6cd")
+
+        self.imgBtnBack = PhotoImage(file="btnBack.png")
+        self.imgBtnBackDark = PhotoImage(file="btnBackDark.png")
+        self.imgBtnMixed = PhotoImage(file="btnMixed.png")
+        self.imgBtnMixedDark = PhotoImage(file="btnMixedDark.png")
+        self.imgBtnMate = PhotoImage(file="btnMate.png")
+        self.imgBtnMateDark = PhotoImage(file="btnMateDark.png")
+        self.imgBtnArte = PhotoImage(file="btnArte.png")
+        self.imgBtnArteDark = PhotoImage(file="btnArteDark.png")
+        self.imgBtnBio = PhotoImage(file="btnBio.png")
+        self.imgBtnBioDark = PhotoImage(file="btnBioDark.png")
+        self.imgBtnIst = PhotoImage(file="btnIst.png")
+        self.imgBtnIstDark = PhotoImage(file="btnIstDark.png")
+        self.imgBtnSport = PhotoImage(file="btnSport.png")
+        self.imgBtnSportDark = PhotoImage(file="btnSportDark.png")
+        self.imgBtnChimie = PhotoImage(file="btnChimie.png")
+        self.imgBtnChimieDark = PhotoImage(file="btnChimieDark.png")
+        self.imgBtnGeo = PhotoImage(file="btnGeo.png")
+        self.imgBtnGeoDark = PhotoImage(file="btnGeoDark.png")
+        self.imgBtnDiv = PhotoImage(file="btnDiv.png")
+        self.imgBtnDivDark = PhotoImage(file="btnDivDark.png")
+
+        self.lblSelect = Label(self, text = "SELECT\nCATEGORY", font=("Rokkitt", 30, "bold"), bg = "#fee6cd", fg = "#b05e11")
+        self.lblSelect.grid(row = 0, column = 1, sticky = NSEW, pady=(20,50))
+
+        self.btnMate = Button(self, compound=CENTER, height=80, image=self.imgBtnMate, border=0,
+                              activebackground="#fee6cd", activeforeground="#af4343", text="Matematică",
+                              font=("Rokkitt", 25, "bold"),
+                              bg="#fee6cd", fg="#af4343",
+                              command = lambda :self.createSuggestForm("matematica"))
+        self.btnMate.bind("<Enter>", lambda event: self.btnMate.configure(image=self.imgBtnMateDark))
+        self.btnMate.bind("<Leave>", lambda event: self.btnMate.configure(image=self.imgBtnMate))
+        self.btnMate.grid(row=2, column=0, padx=(40, 86), pady=(25,25))
+
+        self.btnArte = Button(self, compound=CENTER, height=80, image=self.imgBtnArte, border=0,
+                             activebackground="#fee6cd", activeforeground="#af4343", text="Arte",
+                             font=("Rokkitt", 25, "bold"),
+                             bg="#fee6cd", fg="#af4343", command = lambda :self.createSuggestForm("arte_divertisment"))
+        self.btnArte.bind("<Enter>", lambda event: self.btnArte.configure(image=self.imgBtnArteDark))
+        self.btnArte.bind("<Leave>", lambda event: self.btnArte.configure(image=self.imgBtnArte))
+        self.btnArte.grid(row=3, column=0, padx=(40, 86))
+
+        self.btnBio = Button(self, compound=CENTER, height=80, image=self.imgBtnBio, border=0,
+                              activebackground="#fee6cd", activeforeground="#af4343", text="Biologie",
+                              font=("Rokkitt", 25, "bold"),
+                              bg="#fee6cd", fg="#af4343",
+                             command = lambda :self.createSuggestForm("biologie"))
+        self.btnBio.bind("<Enter>", lambda event: self.btnBio.configure(image=self.imgBtnBioDark))
+        self.btnBio.bind("<Leave>", lambda event: self.btnBio.configure(image=self.imgBtnBio))
+        self.btnBio.grid(row = 1, column = 1)
+
+        self.btnIst = Button(self, compound=CENTER, height=80, image=self.imgBtnIst, border=0,
+                             activebackground="#fee6cd", activeforeground="#af4343", text="Istorie",
+                             font=("Rokkitt", 25, "bold"),
+                             bg="#fee6cd", fg="#af4343", command = lambda :self.createSuggestForm("istorie"))
+        self.btnIst.bind("<Enter>", lambda event: self.btnIst.configure(image=self.imgBtnIstDark))
+        self.btnIst.bind("<Leave>", lambda event: self.btnIst.configure(image=self.imgBtnIst))
+        self.btnIst.grid(row=2, column=1, pady=(25,25))
+
+        self.btnSport = Button(self, compound=CENTER, height=80, image=self.imgBtnSport, border=0,
+                             activebackground="#fee6cd", activeforeground="#af4343", text="Sport",
+                             font=("Rokkitt", 25, "bold"),
+                             bg="#fee6cd", fg="#af4343",
+                               command = lambda :self.createSuggestForm("sport"))
+        self.btnSport.bind("<Enter>", lambda event: self.btnSport.configure(image=self.imgBtnSportDark))
+        self.btnSport.bind("<Leave>", lambda event: self.btnSport.configure(image=self.imgBtnSport))
+        self.btnSport.grid(row=3, column=1)
+
+        self.btnChimie = Button(self, compound=CENTER, height=80, image=self.imgBtnChimie, border=0,
+                             activebackground="#fee6cd", activeforeground="#af4343", text="Chimie",
+                             font=("Rokkitt", 25, "bold"),
+                             bg="#fee6cd", fg="#af4343", command = lambda :self.createSuggestForm("chimie"))
+        self.btnChimie.bind("<Enter>", lambda event: self.btnChimie.configure(image=self.imgBtnChimieDark))
+        self.btnChimie.bind("<Leave>", lambda event: self.btnChimie.configure(image=self.imgBtnChimie))
+        self.btnChimie.grid(row = 1, column = 2, padx=(86, 0))
+
+        self.btnGeo = Button(self, compound=CENTER, height=80, image=self.imgBtnGeo, border=0,
+                               activebackground="#fee6cd", activeforeground="#af4343", text="Geografie",
+                               font=("Rokkitt", 25, "bold"),
+                               bg="#fee6cd", fg="#af4343", command = lambda :self.createSuggestForm("geografie"))
+        self.btnGeo.bind("<Enter>", lambda event: self.btnGeo.configure(image=self.imgBtnGeoDark))
+        self.btnGeo.bind("<Leave>", lambda event: self.btnGeo.configure(image=self.imgBtnGeo))
+        self.btnGeo.grid(row=2, column=2, padx=(86, 0), pady=(25,25))
+
+        self.btnDiv = Button(self, compound=CENTER, height=80, image=self.imgBtnDiv, border=0,
+                               activebackground="#fee6cd", activeforeground="#af4343", text="Diverse",
+                               font=("Rokkitt", 25, "bold"),
+                               bg="#fee6cd", fg="#af4343",
+                             command = lambda :self.createSuggestForm("diverse"))
+        self.btnDiv.bind("<Enter>", lambda event: self.btnDiv.configure(image=self.imgBtnDivDark))
+        self.btnDiv.bind("<Leave>", lambda event: self.btnDiv.configure(image=self.imgBtnDiv))
+        self.btnDiv.grid(row = 1, column = 0, padx=(40, 86))
+
+
+        self.btnBack = Button(self, compound=CENTER, text="Back", image=self.imgBtnBack, border=0,
+                              font=("Rokkitt", 18, "bold"),
+                              bg="#fee6cd", fg="black", activebackground="#fee6cd", activeforeground="black",
+                              command=lambda: controller.show_frame(MainMenu))
+        self.btnBack.bind("<Enter>", lambda event: self.btnBack.configure(image=self.imgBtnBackDark))
+        self.btnBack.bind("<Leave>", lambda event: self.btnBack.configure(image=self.imgBtnBack))
+        self.btnBack.grid(row=4, column=0, sticky = W, padx=(30, 0), pady=(70, 0))
+
+    def createSuggestForm(self, category):
+        frame = SuggestForm(app.container, app, category)
+        app.frames[SuggestForm] = frame
+        frame.grid(row=0, column=0, sticky="nsew")
+        app.show_frame(SuggestForm)
+
+
+
+
+class SuggestForm(Frame):
+    categ = ''
+    def __init__(self, parent, controller, category):
+        Frame.__init__(self, parent)
+
+        self.categ = category
+
+        self.configure(bg = "#fee6cd")
+
+        self.imgBtnBack = PhotoImage(file="btnBack.png")
+        self.imgBtnBackDark = PhotoImage(file="btnBackDark.png")
+
+        self.lblSuggest = Label(self, text="Suggest a Question", font=("Rokkitt", 50, "bold"), bg="#fee6cd", fg="#a8b9ff")
+        self.lblSuggest.grid(row=0, column=0, columnspan=2, padx=(130, 0), pady=(0, 0))
+
+        self.lblQst = Label(self, text="Question:", font=("Rokkitt", 18, "bold"), bg="#fee6cd", fg="#b05e11")
+        self.lblQst.grid(row=1, column=0, padx=(70, 0), pady=(20, 0), sticky=E)
+
+        self.entryQst = Entry(self, font=("Rokkitt", 18), fg="#b05e11", width = 35)
+        self.entryQst.grid(row=1, column=1, padx=(30, 0), pady=(10, 0))
+
+        self.lblAns1 = Label(self, text="Answer 1:", font=("Rokkitt", 18, "bold"), bg="#fee6cd",
+                                  fg="#b05e11")
+        self.lblAns1.grid(row=2, column=0, padx=(70, 0), pady=(6, 0), sticky=E)
+
+        self.entryAns1 = Entry(self, font=("Rokkitt", 18), fg="#b05e11")
+        self.entryAns1.grid(row=2, column=1, padx=(30, 0), pady=(6, 0))
+
+        self.lblAns2 = Label(self, text="Answer 2:", font=("Rokkitt", 18, "bold"), bg="#fee6cd",
+                                 fg="#b05e11")
+        self.lblAns2.grid(row=3, column=0, padx=(70, 0), pady=(6, 0), sticky=E)
+
+        self.entryAns2 = Entry(self, font=("Rokkitt", 18), fg="#b05e11")
+        self.entryAns2.grid(row=3, column=1, padx=(30, 0), pady=(6, 0))
+
+        self.lblAns3 = Label(self, text="Answer 3:", font=("Rokkitt", 18, "bold"), bg="#fee6cd",
+                                 fg="#b05e11")
+        self.lblAns3.grid(row=4, column=0, padx=(70, 0), pady=(6, 0), sticky=E)
+
+        self.entryAns3 = Entry(self, font=("Rokkitt", 18), fg="#b05e11")
+        self.entryAns3.grid(row=4, column=1, padx=(30, 0), pady=(6, 0))
+
+        self.lblAns4 = Label(self, text="Answer 4:", font=("Rokkitt", 18, "bold"), bg="#fee6cd",
+                              fg="#b05e11")
+        self.lblAns4.grid(row=5, column=0, padx=(70, 0), pady=(6, 0), sticky=E)
+
+        self.entryAns4 = Entry(self, font=("Rokkitt", 18), fg="#b05e11")
+        self.entryAns4.grid(row=5, column=1, padx=(30, 0), pady=(6, 0))
+
+        self.lblCorrectAns = Label(self, text="Correct answer number:", font=("Rokkitt", 18, "bold"), bg="#fee6cd",
+                             fg="#b05e11")
+        self.lblCorrectAns.grid(row=6, column=0, padx=(70, 0), pady=(6, 0), sticky=E)
+
+        self.entryCorrectAns = Entry(self, font=("Rokkitt", 18), fg="#b05e11")
+        self.entryCorrectAns.grid(row=6, column=1, padx=(30, 0), pady=(6, 0))
+
+        self.lblWarning = Label(self, text="", font=("Rokkitt", 18, "bold"), bg="#fee6cd", fg="red")
+        self.lblWarning.grid(row=7, column=0, columnspan=2, padx=(130, 0), pady=(10, 0))
+
+        self.btnSubmit = Button(self, compound=CENTER, text="SUBMIT", image=self.imgBtnBack, border=0,
+                              font=("Rokkitt", 18, "bold"),
+                              bg="#fee6cd", fg="black", activebackground="#fee6cd", activeforeground="black",
+                              command = self.submit)
+        self.btnSubmit.bind("<Enter>", lambda event: self.btnSubmit.configure(image=self.imgBtnBackDark))
+        self.btnSubmit.bind("<Leave>", lambda event: self.btnSubmit.configure(image=self.imgBtnBack))
+        self.btnSubmit.grid(row=8, column=0, columnspan = 2, padx=(130, 0), pady=(10, 0))
+
+        self.btnBack = Button(self, compound=CENTER, text="Back", image=self.imgBtnBack, border=0,
+                              font=("Rokkitt", 18, "bold"),
+                              bg="#fee6cd", fg="black", activebackground="#fee6cd", activeforeground="black",
+                              command=lambda: [self.abort(), controller.show_frame(CategorySuggest), self.destroy(),
+                                               self.kill()])
+        self.btnBack.bind("<Enter>", lambda event: self.btnBack.configure(image=self.imgBtnBackDark))
+        self.btnBack.bind("<Leave>", lambda event: self.btnBack.configure(image=self.imgBtnBack))
+        self.btnBack.grid(row=9, column=0, padx=(30, 75), pady=(44, 0), sticky = W)
+
+    def submit(self):
+        qst = self.entryQst.get()
+        ans1 = self.entryAns1.get()
+        ans2 = self.entryAns2.get()
+        ans3 = self.entryAns3.get()
+        ans4 = self.entryAns4.get()
+        correctAns = self.entryCorrectAns.get()
+
+        if not qst or not ans1 or not ans2 or not ans3 or not ans4 or not correctAns:
+            self.lblWarning.configure(text="Camp gol!", fg="red")
+            self.lblWarning.after(1500, lambda: self.lblWarning.configure(text=""))
+        else:
+            if correctAns not in ['1', '2', '3', '4']:
+                self.lblWarning.configure(text="Raspunsul corect este in intervalul 1-4!", fg="red")
+                self.lblWarning.after(1500, lambda: self.lblWarning.configure(text=""))
+            else:
+                conn = sqlite3.connect('mdsproject.db')
+                c = conn.cursor()
+
+                c.execute(
+                    "INSERT INTO suggested_qst (category, question, ans1, ans2, ans3, ans4, crr_ans_nr) VALUES (?,?,?,?,?,?,?)",
+                    (self.categ, qst, ans1, ans2, ans3, ans4, int(correctAns))
+                    )
+
+                self.lblWarning.configure(text="Intrebare trimisa!", fg="green")
+                self.lblWarning.after(1500, lambda: self.lblWarning.configure(text=""))
+
+                self.entryQst.delete(0, END)
+                self.entryAns1.delete(0, END)
+                self.entryAns2.delete(0, END)
+                self.entryAns3.delete(0, END)
+                self.entryAns4.delete(0, END)
+                self.entryCorrectAns.delete(0, END)
+
+                conn.commit()
+                conn.close()
+
+    def kill(self):
+        del self
+        gc.collect()
+
+    def abort(self):
+        del app.frames[SuggestForm]
+
+
+
 class LogIn(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
@@ -532,6 +927,9 @@ class LogIn(Frame):
                     self.lblWarning2.configure(text="Inregistrare efectuata!", fg="green")
                     self.lblWarning2.after(1500, lambda: self.lblWarning2.configure(text=""))
 
+                    self.entryUser2.delete(0, END)
+                    self.entryPass2.delete(0, END)
+
                     conn.commit()
                     conn.close()
 
@@ -623,7 +1021,7 @@ class LogIn(Frame):
                                                               font=("Rokkitt", 18, "bold"), image=app.frames[MainMenu].imgBtnSmall,
                                                               borderwidth=0, fg="#b0b315",
                                                               bg="#fee3d2", activebackground="#fee3d2", activeforeground="#b0b315",
-                                                              command=lambda: app.show_frame(GameMode))
+                                                              command = lambda: app.show_frame(CategorySuggest))
                     app.frames[MainMenu].btnSuggest.bind("<Enter>", lambda event: app.frames[MainMenu].btnSuggest.configure(
                         image=app.frames[MainMenu].imgBtnSmallDark))
                     app.frames[MainMenu].btnSuggest.bind("<Leave>", lambda event: app.frames[MainMenu].btnSuggest.configure(
@@ -634,7 +1032,7 @@ class LogIn(Frame):
                                                              font=("Rokkitt", 18, "bold"), image=app.frames[MainMenu].imgBtnSmall,
                                                              borderwidth=0, fg="#b0b315",
                                                              bg="#fee3d2", activebackground="#fee3d2", activeforeground="#b0b315",
-                                                             command=lambda: app.show_frame(GameMode))
+                                                             command=self.createReview)
                     app.frames[MainMenu].btnReview.bind("<Enter>", lambda event: app.frames[MainMenu].btnReview.configure(
                         image=app.frames[MainMenu].imgBtnSmallDark))
                     app.frames[MainMenu].btnReview.bind("<Leave>", lambda event: app.frames[MainMenu].btnReview.configure(
@@ -671,6 +1069,12 @@ class LogIn(Frame):
 
                     app.show_frame(MainMenu)
 
+
+    def createReview(self):
+        frame = Review(app.container, app)
+        app.frames[Review] = frame
+        frame.grid(row=0, column=0, sticky="nsew")
+        app.show_frame(Review)
 
     def kill(self):
         del self
@@ -776,7 +1180,7 @@ class Category(Frame):
         self.btnMate = Button(self, compound=CENTER, height=80, image=self.imgBtnMate, border=0,
                               activebackground="#fee6cd", activeforeground="#af4343", text="Matematică",
                               font=("Rokkitt", 25, "bold"),
-                              bg="#fee6cd", fg="#af4343")
+                              bg="#fee6cd", fg="#af4343", command = lambda :self.startGame("matematica"))
         self.btnMate.bind("<Enter>", lambda event: self.btnMate.configure(image=self.imgBtnMateDark))
         self.btnMate.bind("<Leave>", lambda event: self.btnMate.configure(image=self.imgBtnMate))
         self.btnMate.grid(row=2, column=0, padx=(40, 86), pady=(25,25))
@@ -792,7 +1196,7 @@ class Category(Frame):
         self.btnBio = Button(self, compound=CENTER, height=80, image=self.imgBtnBio, border=0,
                               activebackground="#fee6cd", activeforeground="#af4343", text="Biologie",
                               font=("Rokkitt", 25, "bold"),
-                              bg="#fee6cd", fg="#af4343")
+                              bg="#fee6cd", fg="#af4343", command = lambda :self.startGame("biologie"))
         self.btnBio.bind("<Enter>", lambda event: self.btnBio.configure(image=self.imgBtnBioDark))
         self.btnBio.bind("<Leave>", lambda event: self.btnBio.configure(image=self.imgBtnBio))
         self.btnBio.grid(row = 1, column = 1)
@@ -808,7 +1212,7 @@ class Category(Frame):
         self.btnSport = Button(self, compound=CENTER, height=80, image=self.imgBtnSport, border=0,
                              activebackground="#fee6cd", activeforeground="#af4343", text="Sport",
                              font=("Rokkitt", 25, "bold"),
-                             bg="#fee6cd", fg="#af4343")
+                             bg="#fee6cd", fg="#af4343", command = lambda :self.startGame("sport"))
         self.btnSport.bind("<Enter>", lambda event: self.btnSport.configure(image=self.imgBtnSportDark))
         self.btnSport.bind("<Leave>", lambda event: self.btnSport.configure(image=self.imgBtnSport))
         self.btnSport.grid(row=3, column=1)
