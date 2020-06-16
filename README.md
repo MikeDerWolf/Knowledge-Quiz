@@ -1,9 +1,16 @@
 # Knowledge-Quiz
-Python Desktop GUI Application
+Python Desktop GUI Application  
+  
+Proiect realizat de:  
+*Lupu Mihai - Razvan  
+*State Corina  
+*Munteanu Ionela  
+*Sin Andrei  
+  
 Link Trello (Backlog + User Stories + Organizare): https://trello.com/b/khRKXneB/knowledge-quiz  
 Code Refactoring: UPLOADED   
 Diagrama UML: UPLOADED  
-Bug Reporting:
+Bug Reporting:  
 Pe parcursul proiectului nu am intalnit bug-uri numeroase, dar printre cele mai importante se regasesc:  
 
 -Datorita functiei after(), prin intermediul careia puteam edita widgeturile Tkinter, utilizatorul avea sansa sa mai apese de cateva ori
