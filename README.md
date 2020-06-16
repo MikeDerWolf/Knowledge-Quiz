@@ -8,8 +8,11 @@ Proiect realizat de:
 *Sin Andrei  
   
 Link Trello (Backlog + User Stories + Organizare): https://trello.com/b/khRKXneB/knowledge-quiz  
+  
 Code Refactoring: UPLOADED   
+  
 Diagrama UML: UPLOADED  
+  
 Bug Reporting:  
 Pe parcursul proiectului nu am intalnit bug-uri numeroase, dar printre cele mai importante se regasesc:  
 
@@ -21,4 +24,6 @@ butoanelor in DISABLED.
 SQLite is meant to be a lightweight database, and thus can't support a high level of concurrency. OperationalError: database is locked 
 errors indicate that your application is experiencing more concurrency than sqlite can handle in default configuration. This error means 
 that one thread or process has an exclusive lock on the database connection and another thread timed out waiting for the lock the be released.
-Solutie: Am rescris codul pentru ca baza de date sa faca tranzactii cat mai scurte.
+Solutie: Am rescris codul pentru ca baza de date sa faca tranzactii cat mai scurte.  
+  
+Link prezentare: to be uploaded
