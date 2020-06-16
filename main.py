@@ -6,6 +6,7 @@ import sqlite3
 import gc
 import random
 import copy
+from threading import Timer
 
 pygame.init()
 pygame.mixer.music.load("RUDE - Eternal Youth.mp3")
@@ -1282,7 +1283,7 @@ class Game(Frame):
         self.t = 15
         self.oneOutCount = 3
         self.twoOutCount = 2
-        self.nr_frame = 0
+        self.nrFrame = 0
         self.score = 0
         self.categ = category
 
@@ -1341,7 +1342,7 @@ class Game(Frame):
 
     def beginTest(self):
         self.container.destroy()
-        self.createNewFrame(self.nr_frame)
+        self.createNewFrame(self.nrFrame)
 
     def countdown(self):
         if self.t>0:
@@ -1354,10 +1355,10 @@ class Game(Frame):
             self.btnQuit.destroy()
             self.btnOneOut.destroy()
             self.btnTwoOut.destroy()
-            if self.nr_frame<20:
+            if self.nrFrame<20:
                 self.t = 15
-                self.createNewFrame(self.nr_frame)
-            elif self.nr_frame == 20:
+                self.createNewFrame(self.nrFrame)
+            elif self.nrFrame == 20:
                 self.lblScore = Label(self, font=("Rokkitt", 36, "bold"), bg = "#fee6cd", fg = "#b05e11",
                                       text="Your Score: " + str(self.score))
                 self.lblScore.pack(pady=(50,0))
@@ -1514,12 +1515,12 @@ class Game(Frame):
         if (self.twoOutCount == 0):
             self.btnTwoOut.configure(state='disabled')
 
-        self.nr_frame += 1
+        self.nrFrame += 1
         self.countdown()
 
     def btnClicked(self, btn):
         self.btnPressed = True
-        text = self.records[self.indexes[self.nr_frame - 1]][5]
+        text = self.records[self.indexes[self.nrFrame - 1]][5]
         self.lbl.configure(text = "")
         self.btn1['command'] = 0
         self.btn2['command'] = 0
@@ -1559,7 +1560,7 @@ class Game(Frame):
         self.t = 2
 
     def eliminateOne(self):
-        text = self.records[self.indexes[self.nr_frame - 1]][5]
+        text = self.records[self.indexes[self.nrFrame - 1]][5]
         buttons = [button for button in [self.btn1, self.btn2, self.btn3, self.btn4] if button['text'] != text]
         index = random.randint(0,2)
         buttons[index]['state'] = 'disabled'
@@ -1569,7 +1570,7 @@ class Game(Frame):
         self.btnTwoOut['state'] = 'disabled'
 
     def eliminateTwo(self):
-        text = self.records[self.indexes[self.nr_frame - 1]][5]
+        text = self.records[self.indexes[self.nrFrame - 1]][5]
         buttons = [button for button in [self.btn1, self.btn2, self.btn3, self.btn4] if button['text'] != text]
         indexes = random.sample(range(0, 3), 2)
         buttons[indexes[0]]['state'] = 'disabled'
@@ -2209,9 +2210,9 @@ class GamePvPSr(Frame):
         else:
             self.rspGresit1 += 1
 
-        self.holder1.destroy()
-        self.btnPass1.destroy()
-        self.createNewFramePlayer1(self.nrFrame1)
+        timer = Timer(0.800, lambda: [self.holder1.destroy(), self.btnPass1.destroy(),
+                                      self.createNewFramePlayer1(self.nrFrame1)])
+        timer.start()
 
 
 
@@ -2316,9 +2317,10 @@ class GamePvPSr(Frame):
         else:
             self.rspGresit2 += 1
 
-        self.holder2.destroy()
-        self.btnPass2.destroy()
-        self.createNewFramePlayer2(self.nrFrame2)
+
+        timer = Timer(0.800, lambda: [self.holder2.destroy(), self.btnPass2.destroy(), self.createNewFramePlayer2(self.nrFrame2)])
+        timer.start()
+
 
 
 
@@ -2367,4 +2369,3 @@ class GamePvPSr(Frame):
 
 app = Root()
 app.mainloop()
-
