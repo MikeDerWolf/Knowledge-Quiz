@@ -26,4 +26,4 @@ errors indicate that your application is experiencing more concurrency than sqli
 that one thread or process has an exclusive lock on the database connection and another thread timed out waiting for the lock the be released.
 Solutie: Am rescris codul pentru ca baza de date sa faca tranzactii cat mai scurte.  
   
-Link prezentare: to be uploaded
+Link prezentare(demo): to be uploaded
