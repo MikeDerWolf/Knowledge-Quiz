@@ -24,7 +24,7 @@ class Root(Tk):
         Tk.__init__(self, *args, **kwargs)
 
         self.title("Knowledge Quiz")
-        self.geometry("950x650+200+50")
+        self.geometry("950x650+200+10")
         self.iconbitmap('brainlogo.ico')
         self.resizable(0, 0)
         # Setup Frame
@@ -828,7 +828,7 @@ class LogIn(Frame):
         self.lblPass1 = Label(self, text="Password", font=("Rokkitt", 16, "bold"), bg="#fee6cd", fg="#b05e11")
         self.lblPass1.grid(row=2, column=0, padx=(300, 0), pady=(10, 0))
 
-        self.entryPass1 = Entry(self, font=("Rokkitt", 16), fg="#b05e11")
+        self.entryPass1 = Entry(self, font=("Rokkitt", 16), fg="#b05e11", show = '*')
         self.entryPass1.grid(row=2, column=1, padx=(20, 0), pady=(10, 0))
 
         self.lblWarning1 = Label(self, text="", font=("Rokkitt", 16, "bold"), bg="#fee6cd", fg="red")
@@ -855,7 +855,7 @@ class LogIn(Frame):
         self.lblPass2 = Label(self, text="Password", font=("Rokkitt", 16, "bold"), bg="#fee6cd", fg="#b05e11")
         self.lblPass2.grid(row=7, column=0, padx=(300, 0), pady=(10, 0))
 
-        self.entryPass2 = Entry(self, font=("Rokkitt", 16), fg="#b05e11")
+        self.entryPass2 = Entry(self, font=("Rokkitt", 16), fg="#b05e11", show = '*')
         self.entryPass2.grid(row=7, column=1, padx=(20, 0), pady=(10, 0))
 
         self.lblWarning2 = Label(self, text="", font=("Rokkitt", 16, "bold"), bg="#fee6cd", fg="red")
@@ -1444,6 +1444,8 @@ class Game(Frame):
         self.container = LabelFrame(self, width=920, height=630, bg="#fee6cd", border=0, relief=SUNKEN)
         self.container.pack(pady=10)
 
+        randomIndex = random.sample([1, 2, 3, 4], 4)
+
         self.lbl = Label(self.container, font=("Rokkitt", 30, "bold"), bg = "#fee6cd", fg = "#b05e11")
         self.lbl.pack()
 
@@ -1454,7 +1456,7 @@ class Game(Frame):
         self.btn1 = Button(self.container, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                                 activebackground="#fee6cd", activeforeground="#af4343",
                                 font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text = self.records[self.indexes[number]][1], command= lambda: self.btnClicked(self.btn1))
+                           text = self.records[self.indexes[number]][randomIndex[0]], command= lambda: self.btnClicked(self.btn1))
         self.btn1.bind("<Enter>", lambda event: self.btn1.configure(image=self.imgBtnQstDark))
         self.btn1.bind("<Leave>", lambda event: self.btn1.configure(image=self.imgBtnQst))
         self.btn1.pack(pady = (30,0))
@@ -1462,7 +1464,7 @@ class Game(Frame):
         self.btn2 = Button(self.container, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                            activebackground="#fee6cd", activeforeground="#af4343",
                            font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text=self.records[self.indexes[number]][2], command= lambda: self.btnClicked(self.btn2))
+                           text=self.records[self.indexes[number]][randomIndex[1]], command= lambda: self.btnClicked(self.btn2))
         self.btn2.bind("<Enter>", lambda event: self.btn2.configure(image=self.imgBtnQstDark))
         self.btn2.bind("<Leave>", lambda event: self.btn2.configure(image=self.imgBtnQst))
         self.btn2.pack(pady = (20,0))
@@ -1470,7 +1472,7 @@ class Game(Frame):
         self.btn3 = Button(self.container, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                            activebackground="#fee6cd", activeforeground="#af4343",
                            font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text=self.records[self.indexes[number]][3], command= lambda: self.btnClicked(self.btn3))
+                           text=self.records[self.indexes[number]][randomIndex[2]], command= lambda: self.btnClicked(self.btn3))
         self.btn3.bind("<Enter>", lambda event: self.btn3.configure(image=self.imgBtnQstDark))
         self.btn3.bind("<Leave>", lambda event: self.btn3.configure(image=self.imgBtnQst))
         self.btn3.pack(pady = (20,0))
@@ -1478,7 +1480,7 @@ class Game(Frame):
         self.btn4 = Button(self.container, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                            activebackground="#fee6cd", activeforeground="#af4343",
                            font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text=self.records[self.indexes[number]][4], command= lambda: self.btnClicked(self.btn4))
+                           text=self.records[self.indexes[number]][randomIndex[3]], command= lambda: self.btnClicked(self.btn4))
         self.btn4.bind("<Enter>", lambda event: self.btn4.configure(image=self.imgBtnQstDark))
         self.btn4.bind("<Leave>", lambda event: self.btn4.configure(image=self.imgBtnQst))
         self.btn4.pack(pady = (20,0))
@@ -1806,6 +1808,8 @@ class GamePvP(Frame):
         self.container = LabelFrame(self, width=920, height=630, bg="#fee6cd", border=0, relief=SUNKEN)
         self.container.pack(pady=10)
 
+        randomIndex = random.sample([1, 2, 3, 4], 4)
+
         self.lbl = Label(self.container, font=("Rokkitt", 30, "bold"), bg = "#fee6cd", fg = "#b05e11")
         self.lbl.pack()
 
@@ -1816,7 +1820,7 @@ class GamePvP(Frame):
         self.btn1 = Button(self.container, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                                 activebackground="#fee6cd", activeforeground="#af4343",
                                 font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text = self.records[self.indexes[number]][1], command= lambda: self.btnClicked(self.btn1))
+                           text = self.records[self.indexes[number]][randomIndex[0]], command= lambda: self.btnClicked(self.btn1))
         self.btn1.bind("<Enter>", lambda event: self.btn1.configure(image=self.imgBtnQstDark))
         self.btn1.bind("<Leave>", lambda event: self.btn1.configure(image=self.imgBtnQst))
         self.btn1.pack(pady = (30,0))
@@ -1824,7 +1828,7 @@ class GamePvP(Frame):
         self.btn2 = Button(self.container, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                            activebackground="#fee6cd", activeforeground="#af4343",
                            font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text=self.records[self.indexes[number]][2], command= lambda: self.btnClicked(self.btn2))
+                           text=self.records[self.indexes[number]][randomIndex[1]], command= lambda: self.btnClicked(self.btn2))
         self.btn2.bind("<Enter>", lambda event: self.btn2.configure(image=self.imgBtnQstDark))
         self.btn2.bind("<Leave>", lambda event: self.btn2.configure(image=self.imgBtnQst))
         self.btn2.pack(pady = (20,0))
@@ -1832,7 +1836,7 @@ class GamePvP(Frame):
         self.btn3 = Button(self.container, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                            activebackground="#fee6cd", activeforeground="#af4343",
                            font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text=self.records[self.indexes[number]][3], command= lambda: self.btnClicked(self.btn3))
+                           text=self.records[self.indexes[number]][randomIndex[2]], command= lambda: self.btnClicked(self.btn3))
         self.btn3.bind("<Enter>", lambda event: self.btn3.configure(image=self.imgBtnQstDark))
         self.btn3.bind("<Leave>", lambda event: self.btn3.configure(image=self.imgBtnQst))
         self.btn3.pack(pady = (20,0))
@@ -1840,7 +1844,7 @@ class GamePvP(Frame):
         self.btn4 = Button(self.container, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                            activebackground="#fee6cd", activeforeground="#af4343",
                            font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text=self.records[self.indexes[number]][4], command= lambda: self.btnClicked(self.btn4))
+                           text=self.records[self.indexes[number]][randomIndex[3]], command= lambda: self.btnClicked(self.btn4))
         self.btn4.bind("<Enter>", lambda event: self.btn4.configure(image=self.imgBtnQstDark))
         self.btn4.bind("<Leave>", lambda event: self.btn4.configure(image=self.imgBtnQst))
         self.btn4.pack(pady = (20,0))
@@ -2112,6 +2116,7 @@ class GamePvPSr(Frame):
         self.holder1 = LabelFrame(self.framePlayer1, width=920, height=630, bg="#fee6cd", border=0, relief=SUNKEN)
         self.holder1.pack(pady=10)
 
+        randomIndex = random.sample([1, 2, 3, 4], 4)
 
         self.qstP1 = Message(self.holder1, width=700, justify=CENTER, font=("Rokkitt", 18), bg="#fee6cd", fg="#b05e11",
                            text=self.records1[number][0])
@@ -2120,7 +2125,7 @@ class GamePvPSr(Frame):
         self.btn1P1 = Button(self.holder1, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                            activebackground="#fee6cd", activeforeground="#af4343",
                            font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text=self.records1[number][1], command=lambda: self.btnClicked1(self.btn1P1))
+                           text=self.records1[number][randomIndex[0]], command=lambda: self.btnClicked1(self.btn1P1))
         self.framePlayers.bind('<a>', lambda a: self.btnClicked1(self.btn1P1, a))
         self.btn1P1.bind("<Enter>", lambda event: self.btn1P1.configure(image=self.imgBtnQstDark))
         self.btn1P1.bind("<Leave>", lambda event: self.btn1P1.configure(image=self.imgBtnQst))
@@ -2129,7 +2134,7 @@ class GamePvPSr(Frame):
         self.btn2P1 = Button(self.holder1, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                            activebackground="#fee6cd", activeforeground="#af4343",
                            font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text=self.records1[number][2], command=lambda: self.btnClicked1(self.btn2P1))
+                           text=self.records1[number][randomIndex[1]], command=lambda: self.btnClicked1(self.btn2P1))
         self.framePlayers.bind('<s>', lambda a: self.btnClicked1(self.btn2P1, a))
         self.btn2P1.bind("<Enter>", lambda event: self.btn2P1.configure(image=self.imgBtnQstDark))
         self.btn2P1.bind("<Leave>", lambda event: self.btn2P1.configure(image=self.imgBtnQst))
@@ -2138,7 +2143,7 @@ class GamePvPSr(Frame):
         self.btn3P1 = Button(self.holder1, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                            activebackground="#fee6cd", activeforeground="#af4343",
                            font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text=self.records1[number][3], command=lambda: self.btnClicked1(self.btn3P1))
+                           text=self.records1[number][randomIndex[2]], command=lambda: self.btnClicked1(self.btn3P1))
         self.framePlayers.bind('<d>', lambda a: self.btnClicked1(self.btn3P1, a))
         self.btn3P1.bind("<Enter>", lambda event: self.btn3P1.configure(image=self.imgBtnQstDark))
         self.btn3P1.bind("<Leave>", lambda event: self.btn3P1.configure(image=self.imgBtnQst))
@@ -2147,7 +2152,7 @@ class GamePvPSr(Frame):
         self.btn4P1 = Button(self.holder1, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                            activebackground="#fee6cd", activeforeground="#af4343",
                            font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text=self.records1[number][4], command=lambda: self.btnClicked1(self.btn4P1))
+                           text=self.records1[number][randomIndex[3]], command=lambda: self.btnClicked1(self.btn4P1))
         self.framePlayers.bind('<f>', lambda a: self.btnClicked1(self.btn4P1, a))
         self.btn4P1.bind("<Enter>", lambda event: self.btn4P1.configure(image=self.imgBtnQstDark))
         self.btn4P1.bind("<Leave>", lambda event: self.btn4P1.configure(image=self.imgBtnQst))
@@ -2189,6 +2194,11 @@ class GamePvPSr(Frame):
         self.btn2P1.unbind("<Leave>")
         self.btn3P1.unbind("<Leave>")
         self.btn4P1.unbind("<Leave>")
+        self.framePlayers.unbind('<a>')
+        self.framePlayers.unbind('<s>')
+        self.framePlayers.unbind('<d>')
+        self.framePlayers.unbind('<f>')
+        self.framePlayers.unbind('<x>')
 
 
         self.btn1P1.configure(image=self.imgBtnQstWrong, fg="black", activeforeground="black", relief=SUNKEN)
@@ -2221,6 +2231,8 @@ class GamePvPSr(Frame):
         self.holder2 = LabelFrame(self.framePlayer2, width=920, height=630, bg="#fee6cd", border=0, relief=SUNKEN)
         self.holder2.pack(pady=10)
 
+        randomIndex = random.sample([1, 2, 3, 4], 4)
+
         self.qstP2 = Message(self.holder2, width=700, justify=CENTER, font=("Rokkitt", 18), bg="#fee6cd", fg="#b05e11",
                            text=self.records2[number][0])
         self.qstP2.pack(fill=BOTH)
@@ -2228,7 +2240,7 @@ class GamePvPSr(Frame):
         self.btn1P2 = Button(self.holder2, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                            activebackground="#fee6cd", activeforeground="#af4343",
                            font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text=self.records2[number][1], command=lambda: self.btnClicked2(self.btn1P2))
+                           text=self.records2[number][randomIndex[0]], command=lambda: self.btnClicked2(self.btn1P2))
         self.framePlayers.bind('<h>', lambda a: self.btnClicked2(self.btn1P2, a))
         self.btn1P2.bind("<Enter>", lambda event: self.btn1P2.configure(image=self.imgBtnQstDark))
         self.btn1P2.bind("<Leave>", lambda event: self.btn1P2.configure(image=self.imgBtnQst))
@@ -2237,7 +2249,7 @@ class GamePvPSr(Frame):
         self.btn2P2 = Button(self.holder2, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                            activebackground="#fee6cd", activeforeground="#af4343",
                            font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text=self.records2[number][2], command=lambda: self.btnClicked2(self.btn2P2))
+                           text=self.records2[number][randomIndex[1]], command=lambda: self.btnClicked2(self.btn2P2))
         self.framePlayers.bind('<j>', lambda a: self.btnClicked2(self.btn2P2, a))
         self.btn2P2.bind("<Enter>", lambda event: self.btn2P2.configure(image=self.imgBtnQstDark))
         self.btn2P2.bind("<Leave>", lambda event: self.btn2P2.configure(image=self.imgBtnQst))
@@ -2246,7 +2258,7 @@ class GamePvPSr(Frame):
         self.btn3P2 = Button(self.holder2, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                            activebackground="#fee6cd", activeforeground="#af4343",
                            font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text=self.records2[number][3], command=lambda: self.btnClicked2(self.btn3P2))
+                           text=self.records2[number][randomIndex[2]], command=lambda: self.btnClicked2(self.btn3P2))
         self.framePlayers.bind('<k>', lambda a: self.btnClicked2(self.btn3P2, a))
         self.btn3P2.bind("<Enter>", lambda event: self.btn3P2.configure(image=self.imgBtnQstDark))
         self.btn3P2.bind("<Leave>", lambda event: self.btn3P2.configure(image=self.imgBtnQst))
@@ -2255,7 +2267,7 @@ class GamePvPSr(Frame):
         self.btn4P2 = Button(self.holder2, compound=CENTER, height=55, image=self.imgBtnQst, border=0,
                            activebackground="#fee6cd", activeforeground="#af4343",
                            font=("Rokkitt", 15), bg="#fee6cd", fg="#af4343",
-                           text=self.records2[number][4], command=lambda: self.btnClicked2(self.btn4P2))
+                           text=self.records2[number][randomIndex[3]], command=lambda: self.btnClicked2(self.btn4P2))
         self.framePlayers.bind('<l>', lambda a: self.btnClicked2(self.btn4P2, a))
         self.btn4P2.bind("<Enter>", lambda event: self.btn4P2.configure(image=self.imgBtnQstDark))
         self.btn4P2.bind("<Leave>", lambda event: self.btn4P2.configure(image=self.imgBtnQst))
@@ -2296,6 +2308,11 @@ class GamePvPSr(Frame):
         self.btn2P2.unbind("<Leave>")
         self.btn3P2.unbind("<Leave>")
         self.btn4P2.unbind("<Leave>")
+        self.framePlayers.unbind('<h>')
+        self.framePlayers.unbind('<j>')
+        self.framePlayers.unbind('<k>')
+        self.framePlayers.unbind('<l>')
+        self.framePlayers.unbind('<m>')
 
 
         self.btn1P2.configure(image=self.imgBtnQstWrong, fg="black", activeforeground="black", relief=SUNKEN)
@@ -2344,7 +2361,7 @@ class GamePvPSr(Frame):
         self.lblTime.destroy()
         self.framePlayers.destroy()
         self.btnQuit.destroy()
-        app.geometry("950x650+200+50")
+        app.geometry("950x650+200+10")
 
         lblResultPlayer1 = Label(self, font=("Rokkitt", 22, "bold"), bg="#fee6cd", fg="#b05e11",
                                  text=self.numePlayer1 + " a obtinut scorul : " + str(self.rspCorect1) + " corecte, "
