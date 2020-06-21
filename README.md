@@ -9,6 +9,9 @@ Proiect realizat de:
   
 Link Trello (Backlog + User Stories + Organizare): https://trello.com/b/khRKXneB/knowledge-quiz  
   
+User stories: UPLOADED  
+
+  
 Code Refactoring: UPLOADED   
   
 Diagrama UML: UPLOADED  
