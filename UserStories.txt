@@ -1,0 +1,23 @@
+User stories:
+
+1. Ca utilizator, vreau să am posibilitatea de a afla atât scorul personal obținut în urma testului, cât și scorurile altor participanți, pentru a vedea unde mă situez în raport cu aceștia.
+
+2. Ca utilizator, vreau să am opțiunea de a asculta muzică în timpul testului pentru a mă relaxa și a mă concentra mai bine.
+
+3. Ca elev, vreau să primesc întrebări dintr-o categorie individuală deoarece aș putea să-mi îmbunătățesc cunoștințele la materia corespunzătoare.
+
+4. Ca jucător, doresc ca testul să conțină întrebări din categorii multiple pentru a putea să estimez nivelul propriu de cultură generală.
+
+5. Ca jucător neexperimentat, aș dori să pot utiliza variante ajutătoare pentru a avea șansa de a da un răspuns corect într-un timp cât mai scurt.
+
+6. Ca jucător, vreau să văd câte răspunsuri corecte pot oferi într-un timp limitat deoarece îmi pot antrena capacitatea de a gândi sub presiune.
+
+7. Ca jucător, aș vrea ca modul Speedrun să prezinte opțiunea de a sări o întrebare în cazul în care nu știu răspunsul, pentru a avea șansa de a răspunde corect la următoarele.
+
+8. Ca jucător, doresc să am posibilitatea de a mă duela cu prietenii, cu scopul de a vedea cine este mai bun.
+
+9. Ca jucător, vreau să pot vedea statisticile rezultate în urma testelor pentru a-mi observa progresul.
+
+10. Ca utilizator, vreau să am posibilitatea de a sugera întrebări pentru categoriile existente, cu scopul de a îmbunătăți aplicația și experiența jucătorilor.
+
+11. Ca administrator, doresc să pot analiza și accepta/respinge întrebările create de comunitate, cu scopul de selecta informații calitative pentru aplicație.
