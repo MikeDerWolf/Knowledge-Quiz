@@ -8,6 +8,7 @@ import random
 import copy
 from threading import Timer
 
+
 pygame.init()
 pygame.mixer.music.load("RUDE - Eternal Youth.mp3")
 pygame.mixer.music.play(loops=-1)
@@ -25,7 +26,7 @@ class Root(Tk):
 
         self.title("Knowledge Quiz")
         self.geometry("950x650+200+10")
-        self.iconbitmap('brainlogo.ico')
+        self.iconbitmap('pictures/brainlogo.ico')
         self.resizable(0, 0)
         # Setup Frame
         self.container = Frame(self)
@@ -49,18 +50,19 @@ class Root(Tk):
         frame.tkraise()
 
 
+
 class MainMenu(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
 
-        self.backgroundImage = ImageTk.PhotoImage(Image.open("backgroundMainMenu.jpg"))
+        self.backgroundImage = ImageTk.PhotoImage(Image.open("pictures/backgroundMainMenu.jpg"))
         self.backgroundLabel = Label(self, image=self.backgroundImage)
         self.backgroundLabel.place(x=0, y=0, relwidth=1, relheight=1)
 
-        self.imgBtn = PhotoImage(file = "btnMenu.png")
-        self.imgBtnPress = PhotoImage(file = "btnMenuDark.png")
-        self.imgBtnSmall = PhotoImage(file = "btnMenuSmall.png")
-        self.imgBtnSmallDark = PhotoImage(file = "btnMenuSmallDark.png")
+        self.imgBtn = PhotoImage(file = "pictures/btnMenu.png")
+        self.imgBtnPress = PhotoImage(file = "pictures/btnMenuDark.png")
+        self.imgBtnSmall = PhotoImage(file = "pictures/btnMenuSmall.png")
+        self.imgBtnSmallDark = PhotoImage(file = "pictures/btnMenuSmallDark.png")
 
         self.btnPlay = Button(self, compound=CENTER, text="PLAY", font=("Rokkitt", 18, "bold"), image = self.imgBtn, borderwidth=0, fg="#68a302",
                               bg="#fee2ca", activebackground="#fee2cd", activeforeground="#68a302", command=lambda: controller.show_frame(GameMode))  # 7eba00
@@ -170,20 +172,21 @@ class MainMenu(Frame):
         userLoggedIn = False
 
 
+
 class Settings(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
 
-        self.imgBtn = PhotoImage(file = "btnSettings.png")
-        self.imgBtnPress = PhotoImage(file="btnSettingsDark.png")
-        self.imgBtnDown = PhotoImage(file="btnSettingsDown.png")
-        self.imgBtnUp = PhotoImage(file="btnSettingsUp.png")
-        self.imgBtnDownDark = PhotoImage(file="btnSettingsDownDark.png")
-        self.imgBtnUpDark = PhotoImage(file="btnSettingsUpDark.png")
-        self.imgBtnBack = PhotoImage(file="btnBack.png")
-        self.imgBtnBackDark = PhotoImage(file="btnBackDark.png")
+        self.imgBtn = PhotoImage(file = "pictures/btnSettings.png")
+        self.imgBtnPress = PhotoImage(file="pictures/btnSettingsDark.png")
+        self.imgBtnDown = PhotoImage(file="pictures/btnSettingsDown.png")
+        self.imgBtnUp = PhotoImage(file="pictures/btnSettingsUp.png")
+        self.imgBtnDownDark = PhotoImage(file="pictures/btnSettingsDownDark.png")
+        self.imgBtnUpDark = PhotoImage(file="pictures/btnSettingsUpDark.png")
+        self.imgBtnBack = PhotoImage(file="pictures/btnBack.png")
+        self.imgBtnBackDark = PhotoImage(file="pictures/btnBackDark.png")
 
-        self.backgroundImage = ImageTk.PhotoImage(Image.open("backgroundSettings.jpg"))
+        self.backgroundImage = ImageTk.PhotoImage(Image.open("pictures/backgroundSettings.jpg"))
         self.backgroundLabel = Label(self, image=self.backgroundImage)
         self.backgroundLabel.place(x=0, y=0, relwidth=1, relheight=1)
 
@@ -248,12 +251,12 @@ class TopScore(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
 
-        self.backgroundImage = ImageTk.PhotoImage(Image.open("backgroundTopScore.jpg"))
+        self.backgroundImage = ImageTk.PhotoImage(Image.open("pictures/backgroundTopScore.jpg"))
         self.backgroundLabel = Label(self, image=self.backgroundImage)
         self.backgroundLabel.place(x=0, y=0, relwidth=1, relheight=1)
 
-        self.imgBtnBack = PhotoImage(file="btnBack.png")
-        self.imgBtnBackDark = PhotoImage(file="btnBackDark.png")
+        self.imgBtnBack = PhotoImage(file="pictures/btnBack.png")
+        self.imgBtnBackDark = PhotoImage(file="pictures/btnBackDark.png")
 
         self.scoreFrame = LabelFrame(self, bg = "#cddbfe", relief = RAISED)
         self.scoreFrame.grid(row = 0, column = 1, pady = (175,0))
@@ -300,12 +303,12 @@ class Statistics(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
 
-        self.backgroundImage = ImageTk.PhotoImage(Image.open("backgroundLogIn.jpg"))
+        self.backgroundImage = ImageTk.PhotoImage(Image.open("pictures/backgroundLogIn.jpg"))
         self.backgroundLabel = Label(self, image=self.backgroundImage)
         self.backgroundLabel.place(x=0, y=0, relwidth=1, relheight=1)
 
-        self.imgBtnBack = PhotoImage(file="btnBack.png")
-        self.imgBtnBackDark = PhotoImage(file="btnBackDark.png")
+        self.imgBtnBack = PhotoImage(file="pictures/btnBack.png")
+        self.imgBtnBackDark = PhotoImage(file="pictures/btnBackDark.png")
 
         self.lblStatistics = Label(self, text="Statistics", font=("Rokkitt", 60, "bold"), bg="#fee6cd", fg="#a8b9ff")
         self.lblStatistics.grid(row=0, column=0, columnspan = 2, padx=(315, 0), pady=(10, 0))
@@ -413,10 +416,10 @@ class Review(Frame):
 
         self.configure(bg = "#fee6cd")
 
-        self.imgBtnBack = PhotoImage(file="btnBack.png")
-        self.imgBtnBackDark = PhotoImage(file="btnBackDark.png")
-        self.imgBtnSmall = PhotoImage(file="btnMenuSmall.png")
-        self.imgBtnSmallDark = PhotoImage(file="btnMenuSmallDark.png")
+        self.imgBtnBack = PhotoImage(file="pictures/btnBack.png")
+        self.imgBtnBackDark = PhotoImage(file="pictures/btnBackDark.png")
+        self.imgBtnSmall = PhotoImage(file="pictures/btnMenuSmall.png")
+        self.imgBtnSmallDark = PhotoImage(file="pictures/btnMenuSmallDark.png")
 
 
         self.qstFrame = LabelFrame(self, bg = "#cddbfe", relief = RAISED, width = 900, height = 550)
@@ -570,26 +573,26 @@ class CategorySuggest(Frame):
 
         self.configure(bg = "#fee6cd")
 
-        self.imgBtnBack = PhotoImage(file="btnBack.png")
-        self.imgBtnBackDark = PhotoImage(file="btnBackDark.png")
-        self.imgBtnMixed = PhotoImage(file="btnMixed.png")
-        self.imgBtnMixedDark = PhotoImage(file="btnMixedDark.png")
-        self.imgBtnMate = PhotoImage(file="btnMate.png")
-        self.imgBtnMateDark = PhotoImage(file="btnMateDark.png")
-        self.imgBtnArte = PhotoImage(file="btnArte.png")
-        self.imgBtnArteDark = PhotoImage(file="btnArteDark.png")
-        self.imgBtnBio = PhotoImage(file="btnBio.png")
-        self.imgBtnBioDark = PhotoImage(file="btnBioDark.png")
-        self.imgBtnIst = PhotoImage(file="btnIst.png")
-        self.imgBtnIstDark = PhotoImage(file="btnIstDark.png")
-        self.imgBtnSport = PhotoImage(file="btnSport.png")
-        self.imgBtnSportDark = PhotoImage(file="btnSportDark.png")
-        self.imgBtnChimie = PhotoImage(file="btnChimie.png")
-        self.imgBtnChimieDark = PhotoImage(file="btnChimieDark.png")
-        self.imgBtnGeo = PhotoImage(file="btnGeo.png")
-        self.imgBtnGeoDark = PhotoImage(file="btnGeoDark.png")
-        self.imgBtnDiv = PhotoImage(file="btnDiv.png")
-        self.imgBtnDivDark = PhotoImage(file="btnDivDark.png")
+        self.imgBtnBack = PhotoImage(file="pictures/btnBack.png")
+        self.imgBtnBackDark = PhotoImage(file="pictures/btnBackDark.png")
+        self.imgBtnMixed = PhotoImage(file="pictures/btnMixed.png")
+        self.imgBtnMixedDark = PhotoImage(file="pictures/btnMixedDark.png")
+        self.imgBtnMate = PhotoImage(file="pictures/btnMate.png")
+        self.imgBtnMateDark = PhotoImage(file="pictures/btnMateDark.png")
+        self.imgBtnArte = PhotoImage(file="pictures/btnArte.png")
+        self.imgBtnArteDark = PhotoImage(file="pictures/btnArteDark.png")
+        self.imgBtnBio = PhotoImage(file="pictures/btnBio.png")
+        self.imgBtnBioDark = PhotoImage(file="pictures/btnBioDark.png")
+        self.imgBtnIst = PhotoImage(file="pictures/btnIst.png")
+        self.imgBtnIstDark = PhotoImage(file="pictures/btnIstDark.png")
+        self.imgBtnSport = PhotoImage(file="pictures/btnSport.png")
+        self.imgBtnSportDark = PhotoImage(file="pictures/btnSportDark.png")
+        self.imgBtnChimie = PhotoImage(file="pictures/btnChimie.png")
+        self.imgBtnChimieDark = PhotoImage(file="pictures/btnChimieDark.png")
+        self.imgBtnGeo = PhotoImage(file="pictures/btnGeo.png")
+        self.imgBtnGeoDark = PhotoImage(file="pictures/btnGeoDark.png")
+        self.imgBtnDiv = PhotoImage(file="pictures/btnDiv.png")
+        self.imgBtnDivDark = PhotoImage(file="pictures/btnDivDark.png")
 
         self.lblSelect = Label(self, text = "SELECT\nCATEGORY", font=("Rokkitt", 30, "bold"), bg = "#fee6cd", fg = "#b05e11")
         self.lblSelect.grid(row = 0, column = 1, sticky = NSEW, pady=(20,50))
@@ -689,8 +692,8 @@ class SuggestForm(Frame):
 
         self.configure(bg = "#fee6cd")
 
-        self.imgBtnBack = PhotoImage(file="btnBack.png")
-        self.imgBtnBackDark = PhotoImage(file="btnBackDark.png")
+        self.imgBtnBack = PhotoImage(file="pictures/btnBack.png")
+        self.imgBtnBackDark = PhotoImage(file="pictures/btnBackDark.png")
 
         self.lblSuggest = Label(self, text="Suggest a Question", font=("Rokkitt", 50, "bold"), bg="#fee6cd", fg="#a8b9ff")
         self.lblSuggest.grid(row=0, column=0, columnspan=2, padx=(130, 0), pady=(0, 0))
@@ -806,13 +809,13 @@ class LogIn(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
 
-        self.imgBtnBack = PhotoImage(file="btnBack.png")
-        self.imgBtnBackDark = PhotoImage(file="btnBackDark.png")
+        self.imgBtnBack = PhotoImage(file="pictures/btnBack.png")
+        self.imgBtnBackDark = PhotoImage(file="pictures/btnBackDark.png")
 
-        self.imgBtnLogin = PhotoImage(file="btnLogin.png")
-        self.imgBtnLoginDark = PhotoImage(file="btnLoginDark.png")
+        self.imgBtnLogin = PhotoImage(file="pictures/btnLogin.png")
+        self.imgBtnLoginDark = PhotoImage(file="pictures/btnLoginDark.png")
 
-        self.backgroundImage = ImageTk.PhotoImage(Image.open("backgroundLogIn.jpg"))
+        self.backgroundImage = ImageTk.PhotoImage(Image.open("pictures/backgroundLogIn.jpg"))
         self.backgroundLabel = Label(self, image=self.backgroundImage)
         self.backgroundLabel.place(x=0, y=0, relwidth=1, relheight=1)
 
@@ -1090,19 +1093,19 @@ class GameMode(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
 
-        self.backgroundImage = ImageTk.PhotoImage(Image.open("backgroundGameMode.jpg"))
+        self.backgroundImage = ImageTk.PhotoImage(Image.open("pictures/backgroundGameMode.jpg"))
         self.backgroundLabel = Label(self, image=self.backgroundImage)
         self.backgroundLabel.place(x=0, y=0, relwidth=1, relheight=1)
 
 
-        self.imgBtnBack = PhotoImage(file="btnBack.png")
-        self.imgBtnBackDark = PhotoImage(file="btnBackDark.png")
-        self.imgBtnSolo = PhotoImage(file="btnSolo.png")
-        self.imgBtnSoloDark = PhotoImage(file="btnSoloDark.png")
-        self.imgBtnPvp = PhotoImage(file="btnPvp.png")
-        self.imgBtnPvpDark = PhotoImage(file="btnPvpDark.png")
-        self.imgBtnPvpSr = PhotoImage(file="btnPvpSr.png")
-        self.imgBtnPvpSrDark = PhotoImage(file="btnPvpSrDark.png")
+        self.imgBtnBack = PhotoImage(file="pictures/btnBack.png")
+        self.imgBtnBackDark = PhotoImage(file="pictures/btnBackDark.png")
+        self.imgBtnSolo = PhotoImage(file="pictures/btnSolo.png")
+        self.imgBtnSoloDark = PhotoImage(file="pictures/btnSoloDark.png")
+        self.imgBtnPvp = PhotoImage(file="pictures/btnPvp.png")
+        self.imgBtnPvpDark = PhotoImage(file="pictures/btnPvpDark.png")
+        self.imgBtnPvpSr = PhotoImage(file="pictures/btnPvpSr.png")
+        self.imgBtnPvpSrDark = PhotoImage(file="pictures/btnPvpSrDark.png")
 
         self.lblSelect = Label(self, text = "SELECT MODE", font=("Rokkitt", 42, "bold"), bg = "#fee6cd", fg = "#b05e11")
         self.lblSelect.grid(row = 0, column = 1, sticky = NSEW, pady=(30,110))
@@ -1160,26 +1163,26 @@ class Category(Frame):
 
         self.configure(bg = "#fee6cd")
 
-        self.imgBtnBack = PhotoImage(file="btnBack.png")
-        self.imgBtnBackDark = PhotoImage(file="btnBackDark.png")
-        self.imgBtnMixed = PhotoImage(file="btnMixed.png")
-        self.imgBtnMixedDark = PhotoImage(file="btnMixedDark.png")
-        self.imgBtnMate = PhotoImage(file="btnMate.png")
-        self.imgBtnMateDark = PhotoImage(file="btnMateDark.png")
-        self.imgBtnArte = PhotoImage(file="btnArte.png")
-        self.imgBtnArteDark = PhotoImage(file="btnArteDark.png")
-        self.imgBtnBio = PhotoImage(file="btnBio.png")
-        self.imgBtnBioDark = PhotoImage(file="btnBioDark.png")
-        self.imgBtnIst = PhotoImage(file="btnIst.png")
-        self.imgBtnIstDark = PhotoImage(file="btnIstDark.png")
-        self.imgBtnSport = PhotoImage(file="btnSport.png")
-        self.imgBtnSportDark = PhotoImage(file="btnSportDark.png")
-        self.imgBtnChimie = PhotoImage(file="btnChimie.png")
-        self.imgBtnChimieDark = PhotoImage(file="btnChimieDark.png")
-        self.imgBtnGeo = PhotoImage(file="btnGeo.png")
-        self.imgBtnGeoDark = PhotoImage(file="btnGeoDark.png")
-        self.imgBtnDiv = PhotoImage(file="btnDiv.png")
-        self.imgBtnDivDark = PhotoImage(file="btnDivDark.png")
+        self.imgBtnBack = PhotoImage(file="pictures/btnBack.png")
+        self.imgBtnBackDark = PhotoImage(file="pictures/btnBackDark.png")
+        self.imgBtnMixed = PhotoImage(file="pictures/btnMixed.png")
+        self.imgBtnMixedDark = PhotoImage(file="pictures/btnMixedDark.png")
+        self.imgBtnMate = PhotoImage(file="pictures/btnMate.png")
+        self.imgBtnMateDark = PhotoImage(file="pictures/btnMateDark.png")
+        self.imgBtnArte = PhotoImage(file="pictures/btnArte.png")
+        self.imgBtnArteDark = PhotoImage(file="pictures/btnArteDark.png")
+        self.imgBtnBio = PhotoImage(file="pictures/btnBio.png")
+        self.imgBtnBioDark = PhotoImage(file="pictures/btnBioDark.png")
+        self.imgBtnIst = PhotoImage(file="pictures/btnIst.png")
+        self.imgBtnIstDark = PhotoImage(file="pictures/btnIstDark.png")
+        self.imgBtnSport = PhotoImage(file="pictures/btnSport.png")
+        self.imgBtnSportDark = PhotoImage(file="pictures/btnSportDark.png")
+        self.imgBtnChimie = PhotoImage(file="pictures/btnChimie.png")
+        self.imgBtnChimieDark = PhotoImage(file="pictures/btnChimieDark.png")
+        self.imgBtnGeo = PhotoImage(file="pictures/btnGeo.png")
+        self.imgBtnGeoDark = PhotoImage(file="pictures/btnGeoDark.png")
+        self.imgBtnDiv = PhotoImage(file="pictures/btnDiv.png")
+        self.imgBtnDivDark = PhotoImage(file="pictures/btnDivDark.png")
 
         self.lblSelect = Label(self, text = "SELECT\nCATEGORY", font=("Rokkitt", 30, "bold"), bg = "#fee6cd", fg = "#b05e11")
         self.lblSelect.grid(row = 0, column = 1, sticky = NSEW, pady=(20,50))
@@ -1287,14 +1290,14 @@ class Game(Frame):
         self.score = 0
         self.categ = category
 
-        self.imgBtnStart = PhotoImage(file="btnStart.png")
-        self.imgBtnStartDark = PhotoImage(file="btnStartDark.png")
-        self.imgBtnQst = PhotoImage(file="btnQst.png")
-        self.imgBtnQstDark = PhotoImage(file="btnQstDark.png")
-        self.imgBtnUtils = PhotoImage(file = "btnUtils.png")
-        self.imgBtnUtilsDark = PhotoImage(file="btnUtilsDark.png")
-        self.imgBtnQstRight = PhotoImage(file = "btnQstRight.png")
-        self.imgBtnQstWrong = PhotoImage(file = "btnQstWrong.png")
+        self.imgBtnStart = PhotoImage(file="pictures/btnStart.png")
+        self.imgBtnStartDark = PhotoImage(file="pictures/btnStartDark.png")
+        self.imgBtnQst = PhotoImage(file="pictures/btnQst.png")
+        self.imgBtnQstDark = PhotoImage(file="pictures/btnQstDark.png")
+        self.imgBtnUtils = PhotoImage(file = "pictures/btnUtils.png")
+        self.imgBtnUtilsDark = PhotoImage(file="pictures/btnUtilsDark.png")
+        self.imgBtnQstRight = PhotoImage(file = "pictures/btnQstRight.png")
+        self.imgBtnQstWrong = PhotoImage(file = "pictures/btnQstWrong.png")
 
 
         self.conn = sqlite3.connect('mdsproject.db')
@@ -1619,14 +1622,14 @@ class GamePvP(Frame):
         self.corecte = 0
 
 
-        self.imgBtnStart = PhotoImage(file="btnStart.png")
-        self.imgBtnStartDark = PhotoImage(file="btnStartDark.png")
-        self.imgBtnQst = PhotoImage(file="btnQst.png")
-        self.imgBtnQstDark = PhotoImage(file="btnQstDark.png")
-        self.imgBtnUtils = PhotoImage(file = "btnUtils.png")
-        self.imgBtnUtilsDark = PhotoImage(file="btnUtilsDark.png")
-        self.imgBtnQstRight = PhotoImage(file = "btnQstRight.png")
-        self.imgBtnQstWrong = PhotoImage(file = "btnQstWrong.png")
+        self.imgBtnStart = PhotoImage(file="pictures/btnStart.png")
+        self.imgBtnStartDark = PhotoImage(file="pictures/btnStartDark.png")
+        self.imgBtnQst = PhotoImage(file="pictures/btnQst.png")
+        self.imgBtnQstDark = PhotoImage(file="pictures/btnQstDark.png")
+        self.imgBtnUtils = PhotoImage(file = "pictures/btnUtils.png")
+        self.imgBtnUtilsDark = PhotoImage(file="pictures/btnUtilsDark.png")
+        self.imgBtnQstRight = PhotoImage(file = "pictures/btnQstRight.png")
+        self.imgBtnQstWrong = PhotoImage(file = "pictures/btnQstWrong.png")
 
 
         self.conn = sqlite3.connect('mdsproject.db')
@@ -1982,14 +1985,14 @@ class GamePvPSr(Frame):
 
 
 
-        self.imgBtnStart = PhotoImage(file="btnStart.png")
-        self.imgBtnStartDark = PhotoImage(file="btnStartDark.png")
-        self.imgBtnQst = PhotoImage(file="btnQst.png")
-        self.imgBtnQstDark = PhotoImage(file="btnQstDark.png")
-        self.imgBtnUtils = PhotoImage(file = "btnUtils.png")
-        self.imgBtnUtilsDark = PhotoImage(file="btnUtilsDark.png")
-        self.imgBtnQstRight = PhotoImage(file = "btnQstRight.png")
-        self.imgBtnQstWrong = PhotoImage(file = "btnQstWrong.png")
+        self.imgBtnStart = PhotoImage(file="pictures/btnStart.png")
+        self.imgBtnStartDark = PhotoImage(file="pictures/btnStartDark.png")
+        self.imgBtnQst = PhotoImage(file="pictures/btnQst.png")
+        self.imgBtnQstDark = PhotoImage(file="pictures/btnQstDark.png")
+        self.imgBtnUtils = PhotoImage(file = "pictures/btnUtils.png")
+        self.imgBtnUtilsDark = PhotoImage(file="pictures/btnUtilsDark.png")
+        self.imgBtnQstRight = PhotoImage(file = "pictures/btnQstRight.png")
+        self.imgBtnQstWrong = PhotoImage(file = "pictures/btnQstWrong.png")
 
 
         self.conn = sqlite3.connect('mdsproject.db')
